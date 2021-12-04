@@ -1,5 +1,7 @@
 const express = require("express");
 const app = express();
+const mongoose = require("./database/db");
+
 require("dotenv").config();
 
 app.use("/", require("./routes/home"));
