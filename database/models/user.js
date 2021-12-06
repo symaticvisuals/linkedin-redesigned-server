@@ -1,6 +1,6 @@
 const { Schema } = require("../db");
 const mongoose = require("../db");
-const { SCHEMAS } = require("../../utils/config");
+const config = require("../../utils/config");
 const { SchemaTypes } = require("mongoose");
 
 const UserSchema = new Schema({
@@ -8,21 +8,22 @@ const UserSchema = new Schema({
 	type: {
 		type: SchemaTypes.String,
 		enum: [
-			SCHEMAS.TYPES.student,
-			SCHEMAS.TYPES.organization,
-			SCHEMAS.TYPES.company,
+
+			config.TYPES.student,
+			config.TYPES.organization,
+			config.TYPES.company,
 		],
-		default: SCHEMAS.TYPES.student,
+		default: config.TYPES.student,
 	},
 	mobile: { type: SchemaTypes.String, required: true },
 	usecase: {
 		type: SchemaTypes.String,
 		enum: [
-			SCHEMAS.USECASE.company,
-			SCHEMAS.USECASE.project,
-			SCHEMAS.USECASE.organization,
+			config.USECASE.company,
+			config.USECASE.project,
+			config.USECASE.organization,
 		],
-		default: SCHEMAS.USECASE.company,
+		default: config.USECASE.company,
 	},
 	auth: {
 		userName: { type: SchemaTypes.String, required: true },
@@ -36,5 +37,5 @@ const UserSchema = new Schema({
 	],
 });
 
-const UserModel = mongoose.model(SCHEMAS.ADMIN, UserSchema);
+const UserModel = mongoose.model(config.SCHEMAS.USER, UserSchema);
 module.exports = UserModel;
