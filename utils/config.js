@@ -20,4 +20,5 @@ module.exports = {
 		SERVER_ERROR: 500,
 		FILE_NOT_FOUND: 404,
 	},
+	LOGIN_EXPIRE_TIME: 1 * 24 * 60 * 60 * 1000
 };

@@ -1,9 +1,13 @@
 const express = require("express");
 const app = express();
 const mongoose = require("./database/db");
+const cookieParser = require('cookie-parser');
 
 // use req.body==>parsse req.body as json
 app.use(express.json());
+
+// Parse Cookie header and populate req.cookies
+app.use(cookieParser());
 
 require("dotenv").config();
 
