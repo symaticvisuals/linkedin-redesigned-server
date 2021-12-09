@@ -1,40 +1,21 @@
 const { Schema } = require("../db");
 const mongoose = require("../db");
 const config = require("../../utils/config");
-const { SchemaTypes } = require("mongoose");
+const { SchemaTypes, SchemaType } = require("mongoose");
 
 const UserSchema = new Schema({
-	email: { type: SchemaTypes.String, required: true },
-	type: {
-		type: SchemaTypes.String,
-		enum: [
+	email: { type: SchemaTypes.String, required: true, unique: true },
+	firstName: { type: SchemaTypes.String, required: true },
+	lastName: { type: SchemaTypes.String, required: true },
+	designation: { type: SchemaTypes.String, required: true },
+	password: { type: SchemaTypes.String, required: true },
+	userName: { type: SchemaTypes.String, required: true, unique: true, trim: true },
+	education: { type: SchemaTypes.String },
+	profilePic: { type: SchemaTypes.String },
+	// posts: [{ type: SchemaTypes.ObjectId, ref: 'Posts' }],
+	emailAuth: { type: SchemaTypes.Number, default: config.dbCode.email_not_Authenticated },
+	isActive: { type: Number, default: config.dbCode.active_by_admin }
 
-			config.TYPES.student,
-			config.TYPES.organization,
-			config.TYPES.company,
-		],
-		default: config.TYPES.student,
-	},
-	mobile: { type: SchemaTypes.String, required: true },
-	usecase: {
-		type: SchemaTypes.String,
-		enum: [
-			config.USECASE.company,
-			config.USECASE.project,
-			config.USECASE.organization,
-		],
-		default: config.USECASE.company,
-	},
-	auth: {
-		userName: { type: SchemaTypes.String, required: true },
-		pass: { type: SchemaTypes.String, required: true },
-	},
-	microservices: [
-		{
-			name: { type: SchemaTypes.String, required: true },
-			clientSecret: { type: SchemaTypes.String, required: true },
-		},
-	],
 });
 
 const UserModel = mongoose.model(config.SCHEMAS.USER, UserSchema);
