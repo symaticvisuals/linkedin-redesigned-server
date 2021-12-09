@@ -13,12 +13,13 @@ const postSchema = new Schema({
     }],
     comments: [{
         comment: { type: SchemaTypes.String },
+        commentBy: { type: SchemaTypes.ObjectId, ref: 'users' },
         time: { type: SchemaTypes.Date }
     }],
-    type: { type: SchemaTypes.String },
+    tags: [{ type: SchemaTypes.String }],
     time: { type: SchemaTypes.Date },
-    active: { type: SchemaTypes.Number, default: config.dbCode.post_active_byAdmin }
-
+    active: { type: SchemaTypes.Number, default: config.dbCode.post_active_byAdmin },
+    postBy: { type: SchemaTypes.ObjectId, ref: 'users' }
 });
 
 const postModel = mongoose.model(config.SCHEMAS.POST, postSchema);

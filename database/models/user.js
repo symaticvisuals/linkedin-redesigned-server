@@ -12,7 +12,7 @@ const UserSchema = new Schema({
 	userName: { type: SchemaTypes.String, required: true, unique: true, trim: true },
 	education: { type: SchemaTypes.String },
 	profilePic: { type: SchemaTypes.String },
-	posts: [{ type: SchemaTypes.ObjectId, ref: 'Posts' }],
+	// posts: [{ type: SchemaTypes.ObjectId, ref: 'Posts' }],
 	emailAuth: { type: SchemaTypes.Number, default: config.dbCode.email_not_Authenticated },
 	isActive: { type: Number, default: config.dbCode.active_by_admin }
 
