@@ -21,6 +21,7 @@ module.exports = {
 		FILE_NOT_FOUND: 404,
 	},
 	LOGIN_EXPIRE_TIME: 1 * 24 * 60 * 60 * 1000,
+	OTP_EXPIRE_TIME: 1 * 24 * 60 * 60,
 	dbCode: {
 		inActive_by_admin: 0,
 		active_by_admin: 1,
@@ -28,5 +29,6 @@ module.exports = {
 		email_not_Authenticated: 0,
 		post_active_byAdmin: 1,
 		post_Inactive_byAdmin: 0,
-	}
+	},
+
 };
