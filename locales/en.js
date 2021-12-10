@@ -3,6 +3,7 @@ module.exports = {
     "admin.login.welcome": "welcome admin",
     "login.fail": "login failed",
     "register.welcome": "U Register SuccessFully",
-    "register.fail": "registeration failed"
-
+    "register.fail": "registeration failed",
+    "emailAuthentication.fail": "email authentication failed",
+    "emailAuthentication.success": "email authentication successfull",
 }
