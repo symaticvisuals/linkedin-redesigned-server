@@ -17,12 +17,22 @@ const findById = async (id) => {
 };
 
 const findByUserName = async (userName) => {
-	let getData = await UserModel.find({ userName: userName });
+	let getData = await UserModel.findOne({ userName: userName });
+	return getData;
+};
+
+const findByEmail = async (email) => {
+	let getData = await UserModel.findOne({ email: email });
 	return getData;
 };
 
 const updateData = async (data) => {
-	const updatedData = await UserModel.findByIdAndUpdate(data.id, data);
+	const updatedData = await UserModel.findByIdAndUpdate(data.id, data.data);
+	return updatedData;
+};
+
+const updateByEmail = async (data) => {
+	const updatedData = await UserModel.updateOne({ email: data.email }, data.updateData);
 	return updatedData;
 };
 
@@ -38,5 +48,7 @@ module.exports = {
 	findById,
 	findByUserName,
 	updateData,
-	deleteUser
+	deleteUser,
+	updateByEmail,
+	findByEmail
 };

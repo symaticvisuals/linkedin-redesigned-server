@@ -5,6 +5,10 @@ module.exports = {
 		POST: "Post"
 
 	},
+	ACCESS: {
+		ADMIN: "ADMIN",
+		USER: "USER"
+	},
 	TYPES: {
 		student: "student",
 		organization: "organization",
