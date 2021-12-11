@@ -144,3 +144,74 @@ exports.searchUser = async (req, res, next) => {
         next(err);
     }
 }
+
+exports.getUserById = async (req, res, next) => {
+    try {
+        let userId = req.params.userId;
+        let getUser = await user.findById(userId);
+
+        if (!getUser) return utils.sendResponse(req, res, false, messageBundle['search.fail'], {}, 'wrong user id');
+
+        if (getUser.isActive == config.dbCode.inActive_by_admin) return utils.sendResponse(req, res, false, '', { userName: getUser.userName }, 'user is blocked by admin');
+
+        let response = _.pick(getUser, ["email", "firstName", "lastName", "designation", "userName", "education", "profilePic"]);
+
+        return utils.sendResponse(req, res, true, messageBundle['search.success'], response, '');
+
+    } catch (err) {
+        if (err.name === 'CastError')
+            return utils.sendResponse(req, res, false, messageBundle['search.fail'], {}, 'not an objectId');
+
+        next(err);
+    }
+}
+
+exports.follow = async (req, res, next) => {
+    try {
+        let otherUserId = req.params.userId;
+
+        if (otherUserId == req.user._id) return utils.sendResponse(req, res, false, '', {}, 'cannot follow yourself');
+        let otherUser = await user.findById(otherUserId);
+
+        if (otherUser.isActive == config.dbCode.inActive_by_admin) return utils.sendResponse(req, res, false, '', { userName: getUser.userName }, 'user is blocked by admin');
+
+        let ifAlredyFollowing = await user.findIfFollowing(req.user._id, otherUserId);
+
+        if (ifAlredyFollowing.length > 0) return utils.sendResponse(req, res, false, '', {}, 'already following');
+        let updateCurrentUser = await user.updateData({
+            id: req.user._id, data: {
+                $inc: {
+                    number_of_following
+                        : 1
+                },
+                $push: {
+                    following: {
+                        userName: otherUser.userName,
+                        userId: otherUser._id
+                    }
+                }
+            }
+        });
+
+        let updateOtherUser = user.updateData({
+            id: otherUserId, data: {
+                $inc: {
+                    number_of_followers: 1
+                },
+                $push: {
+                    followers: {
+                        userName: req.user.userName,
+                        userId: req.user._id
+                    }
+                }
+            }
+        });
+        console.log(updateCurrentUser);
+        return utils.sendResponse(req, res, true, messageBundle['update.success'], ifFollowing, '');
+    } catch (err) {
+        if (err.name === 'CastError')
+            return utils.sendResponse(req, res, false, messageBundle['search.fail'], {}, 'not an objectId');
+
+        next(err);
+    }
+}

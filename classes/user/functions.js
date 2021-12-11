@@ -6,7 +6,7 @@ const moment = require('moment');
 require('dotenv').config();
 
 exports.getUserJwt = async (userData) => {
-    let jwtData = _.pick(userData, ["_id", "email", "firstName"]);
+    let jwtData = _.pick(userData, ["_id", "email", "userName"]);
     jwtData.expireTime = moment() + config.LOGIN_EXPIRE_TIME;
     jwtData.access = config.ACCESS.USER;
     let jwtToken = jwt.encode(jwtData, process.env.NOMI_USER_JWTKEY);

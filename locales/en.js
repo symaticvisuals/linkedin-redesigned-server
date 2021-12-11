@@ -10,4 +10,6 @@ module.exports = {
     "search.success": "search successfull",
     "jwtDecode.success": "jwt decoded successfully",
     "jwtDecode.fail": "jwt decoded failed",
+    "update.success": "update was successfull",
+    "update.fail": "update failed",
 }

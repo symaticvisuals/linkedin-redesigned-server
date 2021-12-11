@@ -14,8 +14,21 @@ const UserSchema = new Schema({
 	profilePic: { type: SchemaTypes.String },
 	// posts: [{ type: SchemaTypes.ObjectId, ref: 'Posts' }],
 	emailAuth: { type: SchemaTypes.Number, default: config.dbCode.email_not_Authenticated },
-	isActive: { type: Number, default: config.dbCode.active_by_admin }
-
+	isActive: { type: Number, default: config.dbCode.active_by_admin },
+	number_of_followers: { type: SchemaTypes.Number, default: 0 },
+	followers: [
+		{
+			userName: { type: SchemaTypes.String },
+			userId: { type: SchemaTypes.ObjectId, ref: "users" }
+		}
+	],
+	number_of_following: { type: SchemaTypes.Number, default: 0 },
+	following: [
+		{
+			userName: { type: SchemaTypes.String },
+			userId: { type: SchemaTypes.ObjectId, ref: "users" }
+		}
+	],
 });
 
 const UserModel = mongoose.model(config.SCHEMAS.USER, UserSchema);

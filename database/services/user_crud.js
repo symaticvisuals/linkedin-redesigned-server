@@ -11,6 +11,11 @@ const find = async () => {
 	return getData;
 };
 
+const findIfFollowing = async (currentUserId, otherUserId) => {
+	let getData = await UserModel.find({ _id: currentUserId, following: { "$elemMatch": { userId: otherUserId } } });
+	return getData;
+};
+
 const findById = async (id) => {
 	let getData = await UserModel.findById(id);
 	return getData;
@@ -50,5 +55,6 @@ module.exports = {
 	updateData,
 	deleteUser,
 	updateByEmail,
-	findByEmail
+	findByEmail,
+	findIfFollowing
 };
