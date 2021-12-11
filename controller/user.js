@@ -12,6 +12,7 @@ const { passwordStrength } = require('check-password-strength');
 const messageBundle = require('../locales/en');
 const { PassThrough } = require('nodemailer/lib/xoauth2');
 require('dotenv').config();
+const _ = require('lodash');
 
 exports.register = async (req, res, next) => {
     try {
@@ -125,6 +126,21 @@ exports.login = async (req, res, next) => {
 
 
     } catch (err) {
+        next(err);
+    }
+}
 
+exports.searchUser = async (req, res, next) => {
+    try {
+        const getUser = await user.findByUserName(req.params.userName);
+        if (!getUser) return utils.sendResponse(req, res, false, messageBundle['search.fail'], {}, 'no such user');
+
+        if (getUser.isActive == config.dbCode.inActive_by_admin) return utils.sendResponse(req, res, false, '', { userName: getUser.userName }, 'user is blocked by admin');
+
+        let response = _.pick(getUser, ["email", "firstName", "lastName", "designation", "userName", "education", "profilePic"]);
+
+        return utils.sendResponse(req, res, true, messageBundle['search.success'], response, '');
+    } catch (err) {
+        next(err);
     }
 }

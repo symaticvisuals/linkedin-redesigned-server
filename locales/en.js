@@ -6,4 +6,8 @@ module.exports = {
     "register.fail": "registeration failed",
     "emailAuthentication.fail": "email authentication failed",
     "emailAuthentication.success": "email authentication successfull",
+    "search.fail": "no search results",
+    "search.success": "search successfull",
+    "jwtDecode.success": "jwt decoded successfully",
+    "jwtDecode.fail": "jwt decoded failed",
 }
