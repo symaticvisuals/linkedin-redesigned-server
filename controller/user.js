@@ -13,6 +13,7 @@ const messageBundle = require('../locales/en');
 const { PassThrough } = require('nodemailer/lib/xoauth2');
 require('dotenv').config();
 const _ = require('lodash');
+const { json } = require('express/lib/response');
 
 exports.register = async (req, res, next) => {
     try {
@@ -121,6 +122,10 @@ exports.login = async (req, res, next) => {
             secure: process.env.NODE_ENV == 'production'
         });
 
+        // set redis key
+
+        await redis.setKey(getUser._id, JSON.stringify(getUser));
+
         let response = { jwt: jwtToken.data, user: getUser };
         return utils.sendResponse(req, res, true, messageBundle['user.login.welcome'], response, '');
 
@@ -213,5 +218,31 @@ exports.follow = async (req, res, next) => {
             return utils.sendResponse(req, res, false, messageBundle['search.fail'], {}, 'not an objectId');
 
         next(err);
+    }
+}
+
+exports.getUserProfile = async (req, res, next) => {
+    try {
+        let user = await redis.getValue(req.user._id);
+        user = JSON.parse(user);
+        return utils.sendResponse(req, res, true, messageBundle['search.success'], user, '');
+
+    } catch (err) {
+        next(err);
+    }
+}
+
+exports.updatMyProfiile = async (req, res, next) => {
+    try {
+        let data = req.body;
+
+        let updatedUser = await user.updateData({ id: req.user._id, data: data });
+
+        await redis.setKey(req.user._id, JSON.stringify(updatedUser));
+
+        return utils.sendResponse(req, res, true, messageBundle['update.success'], updatedUser, '');
+
+    } catch (err) {
+
     }
 }

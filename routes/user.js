@@ -9,5 +9,7 @@ router.route('/login').post(userController.login);
 router.route("/search/byUserName/:userName").get(auth.isUserJwt, userController.searchUser);
 router.route('/search/byUserId/:userId').get(auth.isUserJwt, userController.getUserById);
 router.route('/follow/:userId').put(auth.isUserJwt, userController.follow);
+router.route('/myProfile').get(auth.isUserJwt, userController.getUserProfile);
+router.route('/updateProfile').get(auth.isUserJwt, userController.updatMyProfiile);
 
 module.exports = router;
