@@ -11,5 +11,7 @@ router.route('/search/byUserId/:userId').get(auth.isUserJwt, userController.getU
 router.route('/follow/:userId').put(auth.isUserJwt, userController.follow);
 router.route('/myProfile').get(auth.isUserJwt, userController.getUserProfile);
 router.route('/updateProfile').put(auth.isUserJwt, userController.updatMyProfiile);
+router.route('/requestPasswordChange/:email').get(userController.requestPasswordChange);
+router.route('/changePassword').put(userController.changePassword);
 
 module.exports = router;

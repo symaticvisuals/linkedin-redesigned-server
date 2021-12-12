@@ -44,7 +44,7 @@ exports.register = async (req, res, next) => {
         let encodedMail = userRegisterd.email;
 
         // link to be sent via mail
-        let link = "http://" + req.get('host') + "/verify?mail=" + encodedMail + "&id=" + rand;
+        let link = "http://" + req.get('host') + "/api/user/verify?email=" + encodedMail + "&id=" + rand;
 
         console.log(link);
         let mailOptions = {
@@ -75,7 +75,6 @@ exports.register = async (req, res, next) => {
 exports.emailAuthentication = async (req, res, next) => {
     try {
         let data = req.query;
-
         let emailOtp = await redis.getValue(data.email);
 
         if (emailOtp == null) return utils.sendResponse(req, res, false, messageBundle['emailAuthentication.fail'], {}, 'no such email registerd');
@@ -217,6 +216,122 @@ exports.updatMyProfiile = async (req, res, next) => {
         return utils.sendResponse(req, res, true, messageBundle['update.success'], updatedUser, '');
 
     } catch (err) {
+        next(err);
+    }
+}
+
+exports.requestPasswordChange = async (req, res, next) => {
+    try {
+        let currentUser = await user.findByEmail(req.params.email);
+
+        let otp = await redis.getValue("req_pass_" + req.params.email);
+
+        if (otp) return utils.sendResponse(req, res, false, messageBundle['update.fail'], {}, "otp already requested");
+        if (!currentUser) {
+            currentUser = await user.findByUserName(req.params.email);
+        }
+
+        if (!currentUser) return utils.sendResponse(req, res, false, messageBundle['search.fail'], {}, 'no such user');
+
+        // generate random string for otp
+        let rand = Math.floor((Math.random() * 100) + 54);
+        let encodedMail = req.params.email;
+
+        // link to be sent via mail
+        let link = "http://" + req.get('host') + "/api/user/changePassword?email=" + encodedMail + "&id=" + rand;
+
+        console.log(link);
+        let mailOptions = {
+            from: process.env.NOMI_MAIL_EMAIL,
+            to: req.params.email,
+            subject: "Password Change Request",
+            html: `Please click on the link to change password <a>${link}</a>`,
+        };
+
+        transporter.sendMail(mailOptions, async function (error, info) {
+            if (error) {
+                return res.status(400).send("something went wrong with email");
+            } else {
+                console.log("Email sent: " + info.response + rand);
+
+                // redis set key of email to randomly generated otp
+                // expires key in 1 day
+                await redis.setKey("req_pass_" + req.params.email, rand, 100);
+
+                return utils.sendResponse(req, res, true, 'email sent successfully', { email: req.params.email, time: 100 }, '')
+            }
+        });
+
+    } catch (err) {
+        next(err);
+    }
+}
+
+exports.changePassword = async (req, res, next) => {
+    try {
+        let data = req.query;
+        let bodyData = req.body;
+
+        let emailOtp = await redis.getValue("req_pass_" + data.email);
+        if (!emailOtp) return utils.sendResponse(req, res, false, messageBundle['emailAuthentication.fail'], {}, 'no such email registerd');
+
+        if (emailOtp != data.id) return utils.sendResponse(req, res, false, messageBundle['emailAuthentication.fail'], {}, 'Invalid Token');
+
+        if (bodyData.password != bodyData.confirmPassword) return utils.sendResponse(req, res, false, messageBundle['update.fail'], {}, 'password and confirm password dont match');
+
+        let passStrength = passwordStrength(bodyData.password, defaultOptions);
+        if (passStrength.value === "Too weak" || passStrength.value === "Weak")
+            return utils.sendResponse(req, res, false, messageBundle['update.fail'], '', "password " + passStrength.value);
+
+        let hashed = await cryptPassword(bodyData.password);
+        console.log(hashed);
+        let updateData = await user.updateByEmail({
+            email: data.email, updateData: {
+                password: hashed
+            }
+        });
+
+        // delete otp from redis as already used
+        await redis.deleteKey("req_pass_" + data.email);
+
+        return utils.sendResponse(req, res, true, messageBundle['update.success'], updateData, '');
+
+    } catch (err) {
+        next(err);
+    }
+}
+
+exports.toggleActiveUser = async (req, res, next) => {
+    try {
+        let userId = req.params.userId;
+
+        // check if userprofile is set in redis
+        let getUser = await redis.getValue(userId);
+
+        if (!getUser) {
+            // else fetch it from database
+            getUser = await user.findById(userId);
+        } else {
+            // if its in redis then parse it to json
+            getUser = JSON.parse(getUser);
+        }
+
+        if (getUser.isActive == config.dbCode.active_by_admin) {
+            getUser.isActive = config.dbCode.inActive_by_admin;
+        } else {
+            getUser.isActive = config.dbCode.active_by_admin;
+        }
+
+        let updatedData = await user.updateData({ id: userId, data: { isActive: getUser.isActive } });
+
+        // set the updated user profile to redis key
+        await redis.setKey(userId, JSON.stringify(updatedData), config.LOGIN_EXPIRE_TIME);
+
+        return utils.sendResponse(req, res, true, messageBundle['update.success'], updatedData, '');
+
+    } catch (err) {
+        if (err.name === 'CastError')
+            return utils.sendResponse(req, res, false, messageBundle['search.fail'], {}, 'not an objectId');
         next(err);
     }
 }
