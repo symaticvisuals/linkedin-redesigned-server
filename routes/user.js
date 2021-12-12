@@ -10,6 +10,6 @@ router.route("/search/byUserName/:userName").get(auth.isUserJwt, userController.
 router.route('/search/byUserId/:userId').get(auth.isUserJwt, userController.getUserById);
 router.route('/follow/:userId').put(auth.isUserJwt, userController.follow);
 router.route('/myProfile').get(auth.isUserJwt, userController.getUserProfile);
-router.route('/updateProfile').get(auth.isUserJwt, userController.updatMyProfiile);
+router.route('/updateProfile').put(auth.isUserJwt, userController.updatMyProfiile);
 
 module.exports = router;

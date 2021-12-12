@@ -183,36 +183,10 @@ exports.follow = async (req, res, next) => {
         let ifAlredyFollowing = await user.findIfFollowing(req.user._id, otherUserId);
 
         if (ifAlredyFollowing.length > 0) return utils.sendResponse(req, res, false, '', {}, 'already following');
-        let updateCurrentUser = await user.updateData({
-            id: req.user._id, data: {
-                $inc: {
-                    number_of_following
-                        : 1
-                },
-                $push: {
-                    following: {
-                        userName: otherUser.userName,
-                        userId: otherUser._id
-                    }
-                }
-            }
-        });
+        let updateCurrentUser = await user.updateFollowing(req.user, otherUser);
 
-        let updateOtherUser = user.updateData({
-            id: otherUserId, data: {
-                $inc: {
-                    number_of_followers: 1
-                },
-                $push: {
-                    followers: {
-                        userName: req.user.userName,
-                        userId: req.user._id
-                    }
-                }
-            }
-        });
-        console.log(updateCurrentUser);
-        return utils.sendResponse(req, res, true, messageBundle['update.success'], ifFollowing, '');
+        let updateOtherUser = user.updateFollowers(req.user, otherUser);
+        return utils.sendResponse(req, res, true, messageBundle['update.success'], {}, '');
     } catch (err) {
         if (err.name === 'CastError')
             return utils.sendResponse(req, res, false, messageBundle['search.fail'], {}, 'not an objectId');
@@ -243,6 +217,6 @@ exports.updatMyProfiile = async (req, res, next) => {
         return utils.sendResponse(req, res, true, messageBundle['update.success'], updatedUser, '');
 
     } catch (err) {
-
+        next(err);
     }
 }
