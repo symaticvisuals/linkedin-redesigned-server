@@ -335,3 +335,11 @@ exports.toggleActiveUser = async (req, res, next) => {
         next(err);
     }
 }
+
+exports.updateProfilePicture = async (req, res, next) => {
+    try {
+        console.log(req.user.profilePicture);
+    } catch (err) {
+
+    }
+}

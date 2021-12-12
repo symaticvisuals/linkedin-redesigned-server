@@ -7,10 +7,12 @@ const postSchema = new Schema({
     message: { type: SchemaTypes.String },
     image: { type: SchemaTypes.string },
     video: { type: SchemaTypes.string },
+    number_of_likes: { type: SchemaTypes.Number, default: 0 },
     likes: [{
         likeBy: { type: SchemaTypes.ObjectId, ref: 'users' },
         time: { type: SchemaTypes.Date }
     }],
+    number_of_comments: { type: SchemaTypes.Number, default: 0 },
     comments: [{
         comment: { type: SchemaTypes.String },
         commentBy: { type: SchemaTypes.ObjectId, ref: 'users' },
