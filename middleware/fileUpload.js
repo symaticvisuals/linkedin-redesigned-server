@@ -1,5 +1,7 @@
 const multer = require('multer');
 const path = require('path');
+const config = require('../utils/config');
+const utils = require('../utils/utils');
 
 // image upload
 
@@ -20,6 +22,8 @@ const imageUpload = multer({
     fileFilter(req, file, cb) {
         if (!file.originalname.match(/\.(png|jpg)$/)) {     // upload only png and jpg format
             return cb(new Error('Please upload a Image'))
+            // return utils.sendResponse(req, null, false, '', {}, 'Please upload a Image');
+
         }
         cb(undefined, true)
     }

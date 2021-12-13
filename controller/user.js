@@ -339,6 +339,14 @@ exports.toggleActiveUser = async (req, res, next) => {
 exports.updateProfilePicture = async (req, res, next) => {
     try {
         console.log(req.user.profilePicture);
+        let imageName = req.user.profilePicture;
+        if (!imageName) return utils.sendResponse(req, res, false, messageBundle['update.fail'], {}, 'please select an image');
+
+        let updatedData = await user.updateData({ id: req.user._id, data: { profilePicture: imageName } });
+
+        redis.setKey(updatedData._id, updatedData);
+        return utils.sendResponse(req, res, false, messageBundle['update.success'], updatedData, '');
+
     } catch (err) {
 
     }
