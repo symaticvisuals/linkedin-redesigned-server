@@ -1,6 +1,10 @@
 const Post = require('../models/post');
 const config = require('../../utils/config');
 
+const createPost = async (data) => {
+    let postData = await Post.create(data);
+    return postData;
+}
 const getAll = async () => {
     let getData = await Post.find();
     return getData;
@@ -32,6 +36,7 @@ const deletePost = async (id) => {
 };
 
 module.exports = {
+    createPost,
     getAll,
     getById,
     getByTags,

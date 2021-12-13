@@ -2,7 +2,9 @@ const express = require('express');
 const router = express.Router();
 const userController = require('../controller/user');
 const auth = require('../controller/auth');
-const { imageUpload } = require("../middleware/fileUpload");
+const { imageUpload, videoUpload } = require("../middleware/fileUpload");
+const postController = require('../controller/post');
+
 
 router.route('/register').post(userController.register);
 router.route('/verify').put(userController.emailAuthentication);
@@ -15,5 +17,8 @@ router.route('/updateProfile').put(auth.isUserJwt, userController.updatMyProfiil
 router.route('/requestPasswordChange/:email').get(userController.requestPasswordChange);
 router.route('/changePassword').put(userController.changePassword);
 router.route('/profilePicture').put(auth.isUserJwt, imageUpload.single('image'), userController.updateProfilePicture);
-
+// post
+router.route('/posts').post(auth.isUserJwt, postController.createPost);
+router.route('/posts/imageUpload').post(auth.isUserJwt, imageUpload.single('image'), postController.imageUpload);
+router.route('/posts/videoUpload').post(auth.isUserJwt, videoUpload.single('video'), postController.videoUpload);
 module.exports = router;

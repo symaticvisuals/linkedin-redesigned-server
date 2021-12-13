@@ -12,4 +12,6 @@ module.exports = {
     "jwtDecode.fail": "jwt decoded failed",
     "update.success": "update was successfull",
     "update.fail": "update failed",
+    "insert.success": "insert was successfull",
+    "insert.fail": "insert failed",
 }

@@ -338,8 +338,7 @@ exports.toggleActiveUser = async (req, res, next) => {
 
 exports.updateProfilePicture = async (req, res, next) => {
     try {
-        console.log(req.user.profilePicture);
-        let imageName = req.user.profilePicture;
+        let imageName = req.image;
         if (!imageName) return utils.sendResponse(req, res, false, messageBundle['update.fail'], {}, 'please select an image');
 
         let updatedData = await user.updateData({ id: req.user._id, data: { profilePicture: imageName } });
@@ -348,6 +347,6 @@ exports.updateProfilePicture = async (req, res, next) => {
         return utils.sendResponse(req, res, false, messageBundle['update.success'], updatedData, '');
 
     } catch (err) {
-
+        next(err);
     }
 }
