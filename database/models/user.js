@@ -11,11 +11,24 @@ const UserSchema = new Schema({
 	password: { type: SchemaTypes.String, required: true },
 	userName: { type: SchemaTypes.String, required: true, unique: true, trim: true },
 	education: { type: SchemaTypes.String },
-	profilePic: { type: SchemaTypes.String },
+	profilePicture: { type: SchemaTypes.String },
 	// posts: [{ type: SchemaTypes.ObjectId, ref: 'Posts' }],
 	emailAuth: { type: SchemaTypes.Number, default: config.dbCode.email_not_Authenticated },
-	isActive: { type: Number, default: config.dbCode.active_by_admin }
-
+	isActive: { type: Number, default: config.dbCode.active_by_admin },
+	number_of_followers: { type: SchemaTypes.Number, default: 0 },
+	followers: [
+		{
+			userName: { type: SchemaTypes.String },
+			userId: { type: SchemaTypes.ObjectId, ref: "users" }
+		}
+	],
+	number_of_following: { type: SchemaTypes.Number, default: 0 },
+	following: [
+		{
+			userName: { type: SchemaTypes.String },
+			userId: { type: SchemaTypes.ObjectId, ref: "users" }
+		}
+	],
 });
 
 const UserModel = mongoose.model(config.SCHEMAS.USER, UserSchema);
