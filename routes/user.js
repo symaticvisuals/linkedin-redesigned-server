@@ -21,4 +21,6 @@ router.route('/profilePicture').put(auth.isUserJwt, imageUpload.single('image'),
 router.route('/posts').post(auth.isUserJwt, postController.createPost);
 router.route('/posts/imageUpload').post(auth.isUserJwt, imageUpload.single('image'), postController.imageUpload);
 router.route('/posts/videoUpload').post(auth.isUserJwt, videoUpload.single('video'), postController.videoUpload);
+router.route('/posts/getPosts').get(auth.isUserJwt, postController.getPosts_home);
+
 module.exports = router;
