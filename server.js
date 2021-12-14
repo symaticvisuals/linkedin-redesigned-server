@@ -1,8 +1,9 @@
 const express = require("express");
 const app = express();
 const mongoose = require("./database/db");
+const cors = require("cors");
 const cookieParser = require("cookie-parser");
-
+app.use(cors());
 // use req.body==>parsse req.body as json
 app.use(express.json());
 
