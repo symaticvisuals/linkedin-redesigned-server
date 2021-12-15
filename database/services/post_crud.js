@@ -11,11 +11,11 @@ const getAll = async () => {
     return getData;
 };
 
-const getInPages = async (page, limit) => {
+const getInPages = async (page, limit, filters) => {
     limit = parseInt(limit);
     let skip = (page - 1) * limit;
 
-    let getData = await Post.find({ active: config.dbCode.post_active_byAdmin }, {}, { limit: limit, skip: skip });
+    let getData = await Post.find({ active: config.dbCode.post_active_byAdmin, tags: { $in: filters } }, {}, { limit: limit, skip: skip });
     // .limit(limit * 1).skip((page - 1) * limit);
     return getData;
 }

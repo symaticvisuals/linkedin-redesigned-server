@@ -51,16 +51,34 @@ exports.videoUpload = async (req, res, next) => {
 
 exports.getPosts_home = async (req, res, next) => {
     try {
-        const { page = 2, limit = 10 } = req.query;
+        const { page = 1, limit = 10 } = req.query;
 
-        let getData = await redis.getValue("posts_page_" + page + req.user._id);
-        // console.log(getData);
-        if (!getData) {
-            getData = await Post.getInPages(page, limit);
+        // get posts of specific page from redis if already saved
+        let getData = await redis.getValue(config.REDIS_PREFIX.POSTS_BY_PAGES + page + req.user._id);
 
-            redis.setKey("posts_page_" + page + req.user._id, JSON.stringify(getData), 100);
+        // check if user has updated filters
+        let filters = await redis.getValue(config.REDIS_PREFIX.SEARCH_FILTERS + req.user._id);
+
+        if (filters) {
+            filters = JSON.parse(filters);
+            console.log(filters);
         } else {
-            console.log(getData);
+
+            // if not updated filters ... then use the old one from jwt
+            filters = req.user.intrestFilters;
+        }
+
+
+        if (!getData) {
+
+            // if redis doesnt have the posts saved. fetch from db
+            getData = await Post.getInPages(page, limit, filters);
+
+            // set the newly fetched post to redis
+            redis.setKey(config.REDIS_PREFIX.POSTS_BY_PAGES + page + req.user._id, JSON.stringify(getData), 100);
+        } else {
+
+            //  this is when you get posts from redis
             getData = JSON.parse(getData);
         }
         return utils.sendResponse(req, res, true, messageBundle['search.success'], getData, '');
