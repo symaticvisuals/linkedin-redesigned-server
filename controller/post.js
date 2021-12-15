@@ -54,10 +54,10 @@ exports.getPosts_home = async (req, res, next) => {
         const { page = 1, limit = 10 } = req.query;
 
         // get posts of specific page from redis if already saved
-        let getData = await redis.getValue("posts_page_" + page + req.user._id);
+        let getData = await redis.getValue(config.REDIS_PREFIX.POSTS_BY_PAGES + page + req.user._id);
 
         // check if user has updated filters
-        let filters = await redis.getValue("searchFilters_" + req.user._id);
+        let filters = await redis.getValue(config.REDIS_PREFIX.SEARCH_FILTERS + req.user._id);
 
         if (filters) {
             filters = JSON.parse(filters);
@@ -75,7 +75,7 @@ exports.getPosts_home = async (req, res, next) => {
             getData = await Post.getInPages(page, limit, filters);
 
             // set the newly fetched post to redis
-            redis.setKey("posts_page_" + page + req.user._id, JSON.stringify(getData), 100);
+            redis.setKey(config.REDIS_PREFIX.POSTS_BY_PAGES + page + req.user._id, JSON.stringify(getData), 100);
         } else {
 
             //  this is when you get posts from redis

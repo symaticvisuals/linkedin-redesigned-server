@@ -362,10 +362,10 @@ exports.addSearchFilter = async (req, res, next) => {
 
         //    update filters on redis
         let newFilters = JSON.stringify(req.user.intrestFilters.concat(filters));
-        await redis.setKey("searchFilters_" + req.user._id, newFilters, config.LOGIN_EXPIRE_TIME);
+        await redis.setKey(config.REDIS_PREFIX.SEARCH_FILTERS + req.user._id, newFilters, config.LOGIN_EXPIRE_TIME);
 
         // delete the posts which were from old filters
-        await redis.deleteKey("posts_page_1" + req.user._id);
+        await redis.deleteKey(config.REDIS_PREFIX.POSTS_BY_PAGES + 1 + req.user._id);
 
         return utils.sendResponse(req, res, true, messageBundle['update.success'], updatedData, '');
     } catch (err) {
@@ -379,7 +379,7 @@ exports.removeSearchFilters = async (req, res, next) => {
         let filtersToBeRemoved = req.body.filters;
 
         //    check if filters are set in redis--> this happens if user ever updated the filters
-        let filters = await redis.getValue("searchFilters_" + req.user._id);
+        let filters = await redis.getValue(config.REDIS_PREFIX.SEARCH_FILTERS + req.user._id);
 
         let newFilters;
 
@@ -395,7 +395,7 @@ exports.removeSearchFilters = async (req, res, next) => {
             filters = newFilters;
         };
 
-        await redis.setKey("searchFilters_" + req.user._id, JSON.stringify(filters), config.LOGIN_EXPIRE_TIME);
+        await redis.setKey(config.REDIS_PREFIX.SEARCH_FILTERS + req.user._id, JSON.stringify(filters), config.LOGIN_EXPIRE_TIME);
 
         user.updateData({ id: req.user._id, data: { intrestFilters: filters } });
 
@@ -409,7 +409,7 @@ exports.removeSearchFilters = async (req, res, next) => {
 exports.getSearchFilters = async (req, res, next) => {
     try {
         // get filters key from redis if user ever updated the filters in given session
-        let filters = await redis.getValue("searchFilters_" + req.user._id);
+        let filters = await redis.getValue(config.REDIS_PREFIX.SEARCH_FILTERS + req.user._id);
 
         // if not in redis take the old ones from jwt 
         if (!filters) {

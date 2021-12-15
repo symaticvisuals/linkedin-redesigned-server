@@ -34,5 +34,10 @@ module.exports = {
 		post_active_byAdmin: 1,
 		post_Inactive_byAdmin: 0,
 	},
+	REDIS_PREFIX: {
+		SEARCH_FILTERS: "searchFilters_",
+		POSTS_BY_PAGES: "posts_page_",
+
+	}
 
 };
