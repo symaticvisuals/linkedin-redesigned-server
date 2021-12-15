@@ -14,6 +14,7 @@ const { PassThrough } = require('nodemailer/lib/xoauth2');
 require('dotenv').config();
 const _ = require('lodash');
 const { json } = require('express/lib/response');
+const UserModel = require('../database/models/user');
 
 exports.register = async (req, res, next) => {
     try {
@@ -349,4 +350,58 @@ exports.updateProfilePicture = async (req, res, next) => {
     } catch (err) {
         next(err);
     }
+};
+
+exports.addSearchFilter = async (req, res, next) => {
+    try {
+        // search filters are of type array
+        let filters = req.body.searchFilter;
+
+        // update filters on mongoDb
+        let updatedData = await user.updateFilter({ id: req.user._id, filters: filters });
+
+        //    update filters on redis
+        let newFilters = JSON.stringify(req.user.intrestFilters.concat(filters));
+        await redis.setKey("searchFilters_" + req.user._id, newFilters, config.LOGIN_EXPIRE_TIME);
+
+        // delete the posts which were from old filters
+        await redis.deleteKey("posts_page_1" + req.user._id);
+
+        return utils.sendResponse(req, res, true, messageBundle['update.success'], updatedData, '');
+    } catch (err) {
+        next(err);
+    }
+};
+
+exports.removeSearchFilters = async (req, res, next) => {
+    try {
+        // filters should come in array from frontend
+        let filtersToBeRemoved = req.body.filters;
+
+        //    check if filters are set in redis--> this happens if user ever updated the filters
+        let filters = await redis.getValue("searchFilters_" + req.user._id);
+
+        let newFilters;
+
+        //  if not redis then use the old ones in jwt    
+        if (!filters) {
+            filters = req.user.intrestFilters;
+        } else {
+            filters = JSON.parse(filters);
+        }
+
+        for (let f of filtersToBeRemoved) {
+            newFilters = filters.filter(el => el != f);
+            filters = newFilters;
+        };
+
+        await redis.setKey("searchFilters_" + req.user._id, JSON.stringify(filters), config.LOGIN_EXPIRE_TIME);
+
+        user.updateData({ id: req.user._id, data: { intrestFilters: filters } });
+
+        return utils.sendResponse(req, res, true, messageBundle['update.success'], filters, '');
+    } catch (err) {
+        next(err);
+    }
+
 }

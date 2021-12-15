@@ -15,6 +15,7 @@ const UserSchema = new Schema({
 	// posts: [{ type: SchemaTypes.ObjectId, ref: 'Posts' }],
 	emailAuth: { type: SchemaTypes.Number, default: config.dbCode.email_not_Authenticated },
 	isActive: { type: Number, default: config.dbCode.active_by_admin },
+	intrestFilters: [{ type: SchemaTypes.String }],
 	number_of_followers: { type: SchemaTypes.Number, default: 0 },
 	followers: [
 		{

@@ -73,6 +73,17 @@ const updateFollowers = async (currentUser, otherUser) => {
 	});
 
 	return updatedUser;
+};
+
+const updateFilter = async (data) => {
+	const updatedFilter = await UserModel.updateOne({ _id: data.id }, {
+		$push: {
+			intrestFilters: {
+				$each: data.filters
+			}
+		}
+	});
+	return updateFilter;
 }
 
 
@@ -92,5 +103,6 @@ module.exports = {
 	findByEmail,
 	findIfFollowing,
 	updateFollowing,
-	updateFollowers
+	updateFollowers,
+	updateFilter
 };

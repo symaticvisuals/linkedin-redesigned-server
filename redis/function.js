@@ -19,6 +19,10 @@ const deleteKey = async (key) => {
     let value = await client.del(key);
     return value;
 }
+
+// const set_SET = async(key)=>{
+
+// }
 module.exports = {
     setKey,
     getValue,
