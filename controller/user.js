@@ -405,3 +405,23 @@ exports.removeSearchFilters = async (req, res, next) => {
     }
 
 }
+
+exports.getSearchFilters = async (req, res, next) => {
+    try {
+        // get filters key from redis if user ever updated the filters in given session
+        let filters = await redis.getValue("searchFilters_" + req.user._id);
+
+        // if not in redis take the old ones from jwt 
+        if (!filters) {
+            filters = req.user.intrestFilters;
+        } else {
+            // if found redis key then parse it
+            filters = JSON.parse(filters);
+        }
+
+        return utils.sendResponse(req, res, true, messageBundle['search.success'], filters, '');
+
+    } catch (err) {
+        next(err);
+    }
+}
