@@ -15,6 +15,7 @@ require('dotenv').config();
 const _ = require('lodash');
 const { json } = require('express/lib/response');
 const UserModel = require('../database/models/user');
+const { REDIS_PREFIX } = require('../utils/config');
 
 exports.register = async (req, res, next) => {
     try {
@@ -225,7 +226,7 @@ exports.requestPasswordChange = async (req, res, next) => {
     try {
         let currentUser = await user.findByEmail(req.params.email);
 
-        let otp = await redis.getValue("req_pass_" + req.params.email);
+        let otp = await redis.getValue(config.REDIS_PREFIX.REQUEST_PASSWORD + req.params.email);
 
         if (otp) return utils.sendResponse(req, res, false, messageBundle['update.fail'], {}, "otp already requested");
         if (!currentUser) {
@@ -273,7 +274,7 @@ exports.changePassword = async (req, res, next) => {
         let data = req.query;
         let bodyData = req.body;
 
-        let emailOtp = await redis.getValue("req_pass_" + data.email);
+        let emailOtp = await redis.getValue(config.REDIS_PREFIX.REQUEST_PASSWORD + data.email);
         if (!emailOtp) return utils.sendResponse(req, res, false, messageBundle['emailAuthentication.fail'], {}, 'no such email registerd');
 
         if (emailOtp != data.id) return utils.sendResponse(req, res, false, messageBundle['emailAuthentication.fail'], {}, 'Invalid Token');
@@ -293,7 +294,7 @@ exports.changePassword = async (req, res, next) => {
         });
 
         // delete otp from redis as already used
-        await redis.deleteKey("req_pass_" + data.email);
+        await redis.deleteKey(config.REDIS_PREFIX.REQUEST_PASSWORD + data.email);
 
         return utils.sendResponse(req, res, true, messageBundle['update.success'], updateData, '');
 
@@ -361,13 +362,13 @@ exports.addSearchFilter = async (req, res, next) => {
         let updatedData = await user.updateFilter({ id: req.user._id, filters: filters });
 
         //    update filters on redis
-        let newFilters = JSON.stringify(req.user.intrestFilters.concat(filters));
+        let newFilters = JSON.stringify(updatedData.intrestFilters);
         await redis.setKey(config.REDIS_PREFIX.SEARCH_FILTERS + req.user._id, newFilters, config.LOGIN_EXPIRE_TIME);
 
         // delete the posts which were from old filters
         await redis.deleteKey(config.REDIS_PREFIX.POSTS_BY_PAGES + 1 + req.user._id);
 
-        return utils.sendResponse(req, res, true, messageBundle['update.success'], updatedData, '');
+        return utils.sendResponse(req, res, true, messageBundle['update.success'], updatedData.intrestFilters, '');
     } catch (err) {
         next(err);
     }

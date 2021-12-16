@@ -37,6 +37,9 @@ module.exports = {
 	REDIS_PREFIX: {
 		SEARCH_FILTERS: "searchFilters_",
 		POSTS_BY_PAGES: "posts_page_",
+		POST_IMAGE: "post_img_",
+		POST_VIDEO: "post_video_",
+		REQUEST_PASSWORD: "req_pass_",
 
 	}
 

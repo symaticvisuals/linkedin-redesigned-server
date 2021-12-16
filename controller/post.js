@@ -7,8 +7,8 @@ const config = require('../utils/config');
 exports.createPost = async (req, res, next) => {
     try {
         let data = req.body;
-        let image = await redis.getValue("post_img_" + req.user._id);
-        let video = await redis.getValue("post_video_" + req.user._id);
+        let image = await redis.getValue(config.REDIS_PREFIX.POST_IMAGE + req.user._id);
+        let video = await redis.getValue(config.REDIS_PREFIX.POST_VIDEO + req.user._id);
 
         if (image) {
             data.image = image;
@@ -33,7 +33,7 @@ exports.imageUpload = async (req, res, next) => {
     try {
         let image = req.image;
         console.log(image);
-        await redis.setKey("post_img_" + req.user._id, image, 120);
+        await redis.setKey(config.REDIS_PREFIX.POST_IMAGE + req.user._id, image, 120);
         return utils.sendResponse(req, res, true, messageBundle['update.success'], image, '');
     } catch (err) {
         next(err);
@@ -42,7 +42,7 @@ exports.imageUpload = async (req, res, next) => {
 exports.videoUpload = async (req, res, next) => {
     try {
         let video = req.video;
-        await redis.setKey("post_video_" + req.user._id, video, 120);
+        await redis.setKey(config.REDIS_PREFIX.POST_VIDEO + req.user._id, video, 120);
         return utils.sendResponse(req, res, true, messageBundle['update.success'], video, '');
     } catch (err) {
         next(err);
@@ -82,6 +82,33 @@ exports.getPosts_home = async (req, res, next) => {
             getData = JSON.parse(getData);
         }
         return utils.sendResponse(req, res, true, messageBundle['search.success'], getData, '');
+    } catch (err) {
+        next(err);
+    }
+}
+
+// search will filter on the basis of message and filters selected by user 
+// also message searches use >>(text) Index 
+
+exports.searchPost = async (req, res, next) => {
+    try {
+        let search = req.params.search;
+
+        // if user has upddated his filters
+        let tags = await redis.getValue(config.REDIS_PREFIX.SEARCH_FILTERS + req.user._id);
+
+        if (!tags) {
+            // if not updated tags use the old ones from jwt
+            tags = req.user.intrestFilters;
+        } else {
+            // parse the redis filters to json
+            tags = JSON.parse(tags);
+        }
+
+        let getData = await Post.getByTagsAndMessage({ tags: tags, message: search });
+
+        utils.sendResponse(req, res, true, messageBundle['search.success'], getData, '');
+
     } catch (err) {
         next(err);
     }
