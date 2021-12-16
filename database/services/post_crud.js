@@ -35,6 +35,13 @@ const getByTags = async (tags) => {
     return getData;
 }
 
+// text index on message attribute as it will help in search results
+const getByTagsAndMessage = async (data) => {
+    const getData = await Post.find({ tags: { "$in": data.tags }, $text: { $search: data.message } });
+    return getData;
+}
+
+
 const updatePost = async (data) => {
     const updateData = await Post.findByIdAndUpdate(data.id, data.updateData, { new: true });
     return updateData;
@@ -52,6 +59,7 @@ module.exports = {
     getById,
     getByTags,
     getByUserId,
+    getByTagsAndMessage,
     updatePost,
     deletePost
 }

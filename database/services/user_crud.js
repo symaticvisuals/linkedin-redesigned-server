@@ -76,8 +76,8 @@ const updateFollowers = async (currentUser, otherUser) => {
 };
 
 const updateFilter = async (data) => {
-	const updatedFilter = await UserModel.updateOne({ _id: data.id }, { intrestFilters: data.filters });
-	return updateFilter;
+	const updatedFilter = await UserModel.findByIdAndUpdate(data.id, { intrestFilters: data.filters }, { new: true });
+	return updatedFilter;
 }
 
 

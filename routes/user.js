@@ -25,5 +25,6 @@ router.route('/posts').post(auth.isUserJwt, postController.createPost);
 router.route('/posts/imageUpload').post(auth.isUserJwt, imageUpload.single('image'), postController.imageUpload);
 router.route('/posts/videoUpload').post(auth.isUserJwt, videoUpload.single('video'), postController.videoUpload);
 router.route('/posts/getPosts').get(auth.isUserJwt, postController.getPosts_home);
+router.route('/posts/searchPosts/:search').get(auth.isUserJwt, postController.searchPost);
 
 module.exports = router;
