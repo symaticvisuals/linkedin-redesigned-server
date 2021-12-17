@@ -3,6 +3,7 @@ const Post = require('../database/services/post_crud');
 const redis = require('../redis/function');
 const messageBundle = require('../locales/en');
 const config = require('../utils/config');
+const { log } = require('async');
 
 exports.createPost = async (req, res, next) => {
     try {
@@ -138,5 +139,77 @@ exports.togglePostActive = async (req, res, next) => {
             return utils.sendResponse(req, res, false, messageBundle['search.fail'], {}, 'not an objectId');
         next(err);
 
+    }
+}
+exports.getMyPosts = async (req, res, next) => {
+    try {
+        let { page = 1, limit = 5 } = req.query;
+
+        // check if user posts are on redis
+        let myPosts = await redis.getValue(config.REDIS_PREFIX.MY_POSTS + req.user._id);
+
+        if (myPosts) {
+            myPosts = JSON.parse(myPosts);
+        } else {
+            // if not found on redis then fetch it from database
+            myPosts = await Post.getByUserId({ id: req.user._id, page: page, limit: limit });
+            //    set the newly fetched data on redis
+            redis.setKey(config.REDIS_PREFIX.MY_POSTS + req.user._id, JSON.stringify(myPosts), config.LOGIN_EXPIRE_TIME);
+        }
+        return utils.sendResponse(req, res, true, messageBundle['search.success'], myPosts, '');
+    } catch (err) {
+        next(err);
+    }
+}
+
+exports.userDeletePost = async (req, res, next) => {
+    try {
+        let userPostId = req.params.postId;
+
+        let delPost = await Post.deleteByUserIdAndPostId({ postId: userPostId, userId: req.user._id });
+
+        if (!delPost) return utils.sendResponse(req, res, false, messageBundle['search.fail'], {}, 'no such post found');
+
+
+        // delete the userPosts from redis as its updated
+        redis.deleteKey(config.REDIS_PREFIX.MY_POSTS + req.user._id);
+
+        // also delete the posts of the other user whose post were liked
+        redis.deleteKey(config.REDIS_PREFIX.MY_POSTS + delPost.postBy);
+
+        return utils.sendResponse(req, res, true, messageBundle['update.success'], delPost, '');
+
+    } catch (err) {
+        if (err.name === 'CastError')
+            return utils.sendResponse(req, res, false, messageBundle['search.fail'], {}, 'not an objectId');
+        next(err);
+    }
+};
+
+exports.likePost_toggle = async (req, res, next) => {
+    try {
+        // check if already liked
+        let ifLiked = await Post.getIfLiked({ postId: req.params.postId, userId: req.user._id });
+        let updatePost;
+
+        // true if liked false if dislike
+        let like;
+
+        if (ifLiked) {
+            // if yes then dislike
+            like = false;
+            updatePost = await Post.updatePostLike_dec({ postId: req.params.postId, userId: req.user._id });
+        } else {
+            // else like 
+            like = true;
+            updatePost = await Post.updatePostLike_inc({ postId: req.params.postId, userId: req.user._id });
+        }
+        return utils.sendResponse(req, res, true, messageBundle['update.success'], { like, userId: req.user._id, postId: req.params.postId }, '');
+
+    } catch (err) {
+        console.log(err);
+        if (err.name === 'CastError')
+            return utils.sendResponse(req, res, false, messageBundle['search.fail'], {}, 'not an objectId');
+        next(err);
     }
 }

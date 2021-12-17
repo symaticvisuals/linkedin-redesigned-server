@@ -26,5 +26,8 @@ router.route('/posts/imageUpload').post(auth.isUserJwt, imageUpload.single('imag
 router.route('/posts/videoUpload').post(auth.isUserJwt, videoUpload.single('video'), postController.videoUpload);
 router.route('/posts/getPosts').get(auth.isUserJwt, postController.getPosts_home);
 router.route('/posts/searchPosts/:search').get(auth.isUserJwt, postController.searchPost);
+router.route('/posts/myPosts').get(auth.isUserJwt, postController.getMyPosts);
+router.route('/posts/myPosts/delete/:postId').put(auth.isUserJwt, postController.userDeletePost);
+router.route('/posts/likePost/:postId').put(auth.isUserJwt, postController.likePost_toggle);
 
 module.exports = router;
