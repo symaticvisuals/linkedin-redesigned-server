@@ -40,6 +40,7 @@ module.exports = {
 		POST_IMAGE: "post_img_",
 		POST_VIDEO: "post_video_",
 		REQUEST_PASSWORD: "req_pass_",
+		MY_POSTS: "my_posts_"
 
 	}
 
