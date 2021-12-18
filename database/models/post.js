@@ -9,14 +9,14 @@ const postSchema = new mongoose.Schema({
     video: { type: SchemaTypes.String },
     number_of_likes: { type: SchemaTypes.Number, default: 0 },
     likes: [{
-        likeBy: { type: SchemaTypes.ObjectId, ref: 'users' },
-        time: { type: SchemaTypes.Date }
+        likeBy: { type: SchemaTypes.ObjectId, ref: 'users', unique: true },
+        time: { type: SchemaTypes.Date, default: Date.now() }
     }],
     number_of_comments: { type: SchemaTypes.Number, default: 0 },
     comments: [{
         comment: { type: SchemaTypes.String },
         commentBy: { type: SchemaTypes.ObjectId, ref: 'users' },
-        time: { type: SchemaTypes.Date }
+        time: { type: SchemaTypes.Date, default: Date.now() }
     }],
     tags: [{ type: SchemaTypes.String }],
     time: { type: SchemaTypes.Date, default: Date.now() },

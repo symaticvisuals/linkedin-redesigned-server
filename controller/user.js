@@ -14,6 +14,8 @@ const { PassThrough } = require('nodemailer/lib/xoauth2');
 require('dotenv').config();
 const _ = require('lodash');
 const { json } = require('express/lib/response');
+const UserModel = require('../database/models/user');
+const { REDIS_PREFIX } = require('../utils/config');
 
 exports.register = async (req, res, next) => {
     try {
@@ -224,7 +226,7 @@ exports.requestPasswordChange = async (req, res, next) => {
     try {
         let currentUser = await user.findByEmail(req.params.email);
 
-        let otp = await redis.getValue("req_pass_" + req.params.email);
+        let otp = await redis.getValue(config.REDIS_PREFIX.REQUEST_PASSWORD + req.params.email);
 
         if (otp) return utils.sendResponse(req, res, false, messageBundle['update.fail'], {}, "otp already requested");
         if (!currentUser) {
@@ -272,7 +274,7 @@ exports.changePassword = async (req, res, next) => {
         let data = req.query;
         let bodyData = req.body;
 
-        let emailOtp = await redis.getValue("req_pass_" + data.email);
+        let emailOtp = await redis.getValue(config.REDIS_PREFIX.REQUEST_PASSWORD + data.email);
         if (!emailOtp) return utils.sendResponse(req, res, false, messageBundle['emailAuthentication.fail'], {}, 'no such email registerd');
 
         if (emailOtp != data.id) return utils.sendResponse(req, res, false, messageBundle['emailAuthentication.fail'], {}, 'Invalid Token');
@@ -292,7 +294,7 @@ exports.changePassword = async (req, res, next) => {
         });
 
         // delete otp from redis as already used
-        await redis.deleteKey("req_pass_" + data.email);
+        await redis.deleteKey(config.REDIS_PREFIX.REQUEST_PASSWORD + data.email);
 
         return utils.sendResponse(req, res, true, messageBundle['update.success'], updateData, '');
 
@@ -344,7 +346,81 @@ exports.updateProfilePicture = async (req, res, next) => {
         let updatedData = await user.updateData({ id: req.user._id, data: { profilePicture: imageName } });
 
         redis.setKey(updatedData._id, updatedData);
-        return utils.sendResponse(req, res, false, messageBundle['update.success'], updatedData, '');
+        return utils.sendResponse(req, res, true, messageBundle['update.success'], updatedData, '');
+
+    } catch (err) {
+        next(err);
+    }
+};
+
+exports.addSearchFilter = async (req, res, next) => {
+    try {
+        // search filters are of type array
+        let filters = req.body.searchFilter;
+
+        // update filters on mongoDb
+        let updatedData = await user.updateFilter({ id: req.user._id, filters: filters });
+
+        //    update filters on redis
+        let newFilters = JSON.stringify(updatedData.intrestFilters);
+        await redis.setKey(config.REDIS_PREFIX.SEARCH_FILTERS + req.user._id, newFilters, config.LOGIN_EXPIRE_TIME);
+
+        // delete the posts which were from old filters
+        await redis.deleteKey(config.REDIS_PREFIX.POSTS_BY_PAGES + 1 + req.user._id);
+
+        return utils.sendResponse(req, res, true, messageBundle['update.success'], updatedData.intrestFilters, '');
+    } catch (err) {
+        next(err);
+    }
+};
+
+exports.removeSearchFilters = async (req, res, next) => {
+    try {
+        // filters should come in array from frontend
+        let filtersToBeRemoved = req.body.filters;
+
+        //    check if filters are set in redis--> this happens if user ever updated the filters
+        let filters = await redis.getValue(config.REDIS_PREFIX.SEARCH_FILTERS + req.user._id);
+
+        let newFilters;
+
+        //  if not redis then use the old ones in jwt    
+        if (!filters) {
+            filters = req.user.intrestFilters;
+        } else {
+            filters = JSON.parse(filters);
+        }
+
+        for (let f of filtersToBeRemoved) {
+            newFilters = filters.filter(el => el != f);
+            filters = newFilters;
+        };
+
+        await redis.setKey(config.REDIS_PREFIX.SEARCH_FILTERS + req.user._id, JSON.stringify(filters), config.LOGIN_EXPIRE_TIME);
+
+        user.updateData({ id: req.user._id, data: { intrestFilters: filters } });
+
+        return utils.sendResponse(req, res, true, messageBundle['update.success'], filters, '');
+    } catch (err) {
+        next(err);
+    }
+
+}
+
+exports.getSearchFilters = async (req, res, next) => {
+    try {
+        // get filters key from redis if user ever updated the filters in given session
+        let filters = await redis.getValue(config.REDIS_PREFIX.SEARCH_FILTERS + req.user._id);
+
+        // if not in redis take the old ones from jwt 
+        if (!filters) {
+            filters = req.user.intrestFilters;
+        } else {
+            // if found redis key then parse it
+            filters = JSON.parse(filters);
+        }
+
+        return utils.sendResponse(req, res, true, messageBundle['search.success'], filters, '');
 
     } catch (err) {
         next(err);

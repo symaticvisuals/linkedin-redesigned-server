@@ -17,10 +17,17 @@ router.route('/updateProfile').put(auth.isUserJwt, userController.updatMyProfiil
 router.route('/requestPasswordChange/:email').get(userController.requestPasswordChange);
 router.route('/changePassword').put(userController.changePassword);
 router.route('/profilePicture').put(auth.isUserJwt, imageUpload.single('image'), userController.updateProfilePicture);
+router.route('/addSearchFilter').put(auth.isUserJwt, userController.addSearchFilter);
+router.route('/removeSearchFilter').put(auth.isUserJwt, userController.removeSearchFilters);
+router.route('/searchFilter').get(auth.isUserJwt, userController.getSearchFilters);
 // post
 router.route('/posts').post(auth.isUserJwt, postController.createPost);
 router.route('/posts/imageUpload').post(auth.isUserJwt, imageUpload.single('image'), postController.imageUpload);
 router.route('/posts/videoUpload').post(auth.isUserJwt, videoUpload.single('video'), postController.videoUpload);
 router.route('/posts/getPosts').get(auth.isUserJwt, postController.getPosts_home);
+router.route('/posts/searchPosts/:search').get(auth.isUserJwt, postController.searchPost);
+router.route('/posts/myPosts').get(auth.isUserJwt, postController.getMyPosts);
+router.route('/posts/myPosts/delete/:postId').put(auth.isUserJwt, postController.userDeletePost);
+router.route('/posts/likePost/:postId').put(auth.isUserJwt, postController.likePost_toggle);
 
 module.exports = router;
