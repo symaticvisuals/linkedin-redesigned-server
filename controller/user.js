@@ -346,7 +346,7 @@ exports.updateProfilePicture = async (req, res, next) => {
         let updatedData = await user.updateData({ id: req.user._id, data: { profilePicture: imageName } });
 
         redis.setKey(updatedData._id, updatedData);
-        return utils.sendResponse(req, res, false, messageBundle['update.success'], updatedData, '');
+        return utils.sendResponse(req, res, true, messageBundle['update.success'], updatedData, '');
 
     } catch (err) {
         next(err);
