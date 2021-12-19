@@ -118,7 +118,7 @@ exports.login = async (req, res, next) => {
 
         let jwtToken = await userJwt.getUserJwt(getUser);
 
-        res.cookie("access_token", jwtToken, {
+        res.cookie("access_token", jwtToken.data, {
             httpOnly: true,
             secure: process.env.NODE_ENV == 'production'
         });
