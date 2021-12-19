@@ -6,7 +6,7 @@ const messageBundle = require('../locales/en');
 
 exports.isUserJwt = async (req, res, next) => {
     try {
-        let jwtToken = req.body.jwtToken || req.cookies.access_token;
+        let jwtToken = req.body.jwtToken || req.cookies.access_token || req.headers["access_token"];
         // console.log(jwtToken.data);
         let payload = await userJwt.decodeJwt(jwtToken.data);
         payload.data.role = config.ACCESS.USER;
@@ -19,7 +19,7 @@ exports.isUserJwt = async (req, res, next) => {
 }
 exports.isAdminJwt = async (req, res, next) => {
     try {
-        let jwtToken = req.body.jwtToken || req.cookies.access_token;
+        let jwtToken = req.body.jwtToken || req.cookies.access_token || req.headers["access_token"];
         let payload = await adminJwt.decodeToken(jwtToken);
         payload.data.role = config.ACCESS.ADMIN;
         req.user = payload.data;
