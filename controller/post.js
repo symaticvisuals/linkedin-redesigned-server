@@ -3,7 +3,7 @@ const Post = require('../database/services/post_crud');
 const redis = require('../redis/function');
 const messageBundle = require('../locales/en');
 const config = require('../utils/config');
-const { log } = require('async');
+const { log, nextTick } = require('async');
 
 exports.createPost = async (req, res, next) => {
     try {
@@ -23,6 +23,8 @@ exports.createPost = async (req, res, next) => {
         console.log(data);
 
         let postData = await Post.createPost(data);
+
+        await redis.deleteKey(config.REDIS_PREFIX.MY_POSTS + req.user._id);
 
         return utils.sendResponse(req, res, true, messageBundle['insert.success'], postData, '');
     } catch (err) {
@@ -76,7 +78,7 @@ exports.getPosts_home = async (req, res, next) => {
             getData = await Post.getInPages(page, limit, filters);
 
             // set the newly fetched post to redis
-            redis.setKey(config.REDIS_PREFIX.POSTS_BY_PAGES + page + req.user._id, JSON.stringify(getData), 100);
+            redis.setKey(config.REDIS_PREFIX.POSTS_BY_PAGES + page + req.user._id, JSON.stringify(getData), 10);
         } else {
 
             //  this is when you get posts from redis
@@ -208,6 +210,51 @@ exports.likePost_toggle = async (req, res, next) => {
 
     } catch (err) {
         console.log(err);
+        if (err.name === 'CastError')
+            return utils.sendResponse(req, res, false, messageBundle['search.fail'], {}, 'not an objectId');
+        next(err);
+    }
+}
+
+exports.createComment = async (req, res, next) => {
+    try {
+        let data = req.body;
+
+
+        let updateData = await Post.updateComment_inc({ postId: data.postId, userId: req.user._id, comment: data.comment });
+        if (!updateData) return utils.sendResponse(req, res, false, messageBundle['update.fail'], {}, 'no such post found');
+
+        // if user comments on his post then its post need to be deleted from redis
+        if (updateData.postBy == req.user._id) {
+            await redis.deleteKey(config.REDIS_PREFIX.MY_POSTS + req.user._id);
+        }
+
+        let response = {
+            comment: updateData.comments[updateData.number_of_comments - 1],
+            nummberOfComments: updateData.number_of_comments
+        };
+
+        return utils.sendResponse(req, res, true, messageBundle['update.success'], response, '');
+    } catch (err) {
+        next(err);
+    }
+}
+
+exports.deleteComment = async (req, res, next) => {
+    try {
+        let data = req.body;
+        let updatePost = await Post.updateByPostIdAndCommentId({ postId: data.postId, userId: req.user._id, commentId: data.commentId });
+
+        if (!updatePost) return utils.sendResponse(req, res, false, messageBundle['update.fail'], {}, 'no such post found');
+
+        // if user comments on his post then its post need to be deleted from redis
+        // if (updatePost.postBy == req.user._id) {
+        //     await redis.deleteKey(config.REDIS_PREFIX.MY_POSTS + req.user._id);
+        // }
+
+        return utils.sendResponse(req, res, true, messageBundle['update.success'], updatePost, '');
+
+    } catch (err) {
         if (err.name === 'CastError')
             return utils.sendResponse(req, res, false, messageBundle['search.fail'], {}, 'not an objectId');
         next(err);
