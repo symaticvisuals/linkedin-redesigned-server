@@ -3,16 +3,18 @@ const app = express();
 const mongoose = require("./database/db");
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
-app.use(function (req, res, next) {
-	//Enabling CORS
-	res.header("Access-Control-Allow-Origin", "http://localhost:3000/");
-	res.header("Access-Control-Allow-Methods", "GET,HEAD,OPTIONS,POST,PUT");
-	res.header(
-		"Access-Control-Allow-Headers",
-		"Origin, X-Requested-With, Content-Type, Accept, x-client-key, x-client-token, x-client-secret, Authorization"
-	);
-	next();
-});
+// app.use(function (req, res, next) {
+// 	//Enabling CORS
+// 	res.header("Access-Control-Allow-Origin", "http://localhost:3000/");
+// 	res.header("Access-Control-Allow-Methods", "GET,HEAD,OPTIONS,POST,PUT");
+// 	res.header(
+// 		"Access-Control-Allow-Headers",
+// 		"Origin, X-Requested-With, Content-Type, Accept, x-client-key, x-client-token, x-client-secret, Authorization"
+// 	);
+// 	next();
+// });
+
+app.use(cors({ credentials: true, origin: "http://localhost:3000" }));
 // use req.body==>parsse req.body as json
 app.use(express.json());
 
