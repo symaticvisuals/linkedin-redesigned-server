@@ -436,3 +436,12 @@ exports.getSearchFilters = async (req, res, next) => {
         next(err);
     }
 }
+
+exports.logOut = async (req, res, next) => {
+    try {
+        return res
+            .clearCookie("access_token")
+            .status(200)
+            .json({ message: "Successfully logged out 😏 🍀" });
+    } catch (err) { next(Err) }
+}
