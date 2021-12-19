@@ -35,8 +35,7 @@ exports.register = async (req, res, next) => {
         console.log(adminObj);
         let newAdmin = await admin.create(adminObj);
         return utils.sendResponse(req, res, true, messageBundle['register.welcome'], _.pick(newAdmin, ['personalInfo', '_id']), '');
-    } catch (err)
-    {
+    } catch (err) {
         console.log(err);
         return utils.sendResponse(req, res, false, messageBundle['register.fail'], '', err);
 
@@ -71,3 +70,11 @@ exports.login = async (req, res, next) => {
     }
 }
 
+exports.logOut = async (req, res, next) => {
+    try {
+        return res
+            .clearCookie("access_token")
+            .status(200)
+            .json({ message: "Successfully logged out 😏 🍀" });
+    } catch (err) { next(Err) }
+}
