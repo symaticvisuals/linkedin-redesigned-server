@@ -55,6 +55,28 @@ const getIfLiked = async (data) => {
 
     return getData;
 }
+
+updateByPostIdAndCommentId = async (data) => {
+    const getData = await Post.findOneAndUpdate({
+        _id: data.postId, active: config.dbCode.post_active_byAdmin,
+        comments: {
+            $elemMatch: {
+                _id: data.commentId
+            }
+        }
+    }, {
+        $inc: { number_of_comments: -1 },
+        $pull: {
+            comments: {
+                _id: data.commentId
+            }
+        }
+    }, {
+        new: true
+    });
+    return getData;
+}
+
 const updatePost = async (data) => {
     const updateData = await Post.findByIdAndUpdate(data.id, data.updateData, { new: true });
     return updateData;
@@ -81,6 +103,18 @@ const updatePostLike_dec = async (data) => {
     return updateData;
 }
 
+const updateComment_inc = async (data) => {
+    const updateData = await Post.findOneAndUpdate({ _id: data.postId, active: config.dbCode.post_active_byAdmin }, {
+        $inc: { number_of_comments: 1 }, $push: {
+            comments: {
+                comment: data.comment,
+                commentBy: data.userId
+            }
+        }
+    }, { new: true });
+    return updateData;
+}
+
 const deletePost = async (id) => {
     const delData = await Post.findByIdAndUpdate(id, { active: config.dbCode.post_Inactive_byAdmin });
     return delData;
@@ -101,6 +135,8 @@ module.exports = {
     getByTagsAndMessage,
     updatePost,
     updatePostLike_inc,
+    updateComment_inc,
+    updateByPostIdAndCommentId,
     deletePost,
     deleteByUserIdAndPostId,
     updatePostLike_dec

@@ -125,7 +125,7 @@ exports.login = async (req, res, next) => {
 
         // set redis key
 
-        await redis.setKey(getUser._id, JSON.stringify(getUser));
+        await redis.setKey(getUser._id, JSON.stringify(getUser), config.LOGIN_EXPIRE_TIME);
 
         let response = { jwt: jwtToken.data, user: getUser };
         return utils.sendResponse(req, res, true, messageBundle['user.login.welcome'], response, '');
@@ -154,7 +154,17 @@ exports.searchUser = async (req, res, next) => {
 exports.getUserById = async (req, res, next) => {
     try {
         let userId = req.params.userId;
-        let getUser = await user.findById(userId);
+
+        // find the user on redis server
+        let getUser = await redis.getValue(userId);
+
+        if (getUser) {
+            // if found parse the string to json
+            getUser = JSON.parse(getUser);
+        } else {
+            // else fetch it from database
+            getUser = await user.findById(userId);
+        }
 
         if (!getUser) return utils.sendResponse(req, res, false, messageBundle['search.fail'], {}, 'wrong user id');
 
@@ -213,7 +223,7 @@ exports.updatMyProfiile = async (req, res, next) => {
 
         let updatedUser = await user.updateData({ id: req.user._id, data: data });
 
-        await redis.setKey(req.user._id, JSON.stringify(updatedUser));
+        await redis.setKey(req.user._id, JSON.stringify(updatedUser), config.LOGIN_EXPIRE_TIME);
 
         return utils.sendResponse(req, res, true, messageBundle['update.success'], updatedUser, '');
 
@@ -345,7 +355,7 @@ exports.updateProfilePicture = async (req, res, next) => {
 
         let updatedData = await user.updateData({ id: req.user._id, data: { profilePicture: imageName } });
 
-        redis.setKey(updatedData._id, updatedData);
+        redis.setKey(updatedData._id, updatedData, config.LOGIN_EXPIRE_TIME);
         return utils.sendResponse(req, res, true, messageBundle['update.success'], updatedData, '');
 
     } catch (err) {

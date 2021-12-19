@@ -24,8 +24,8 @@ module.exports = {
 		SERVER_ERROR: 500,
 		FILE_NOT_FOUND: 404,
 	},
-	LOGIN_EXPIRE_TIME: 1 * 24 * 60 * 60 * 1000,
-	OTP_EXPIRE_TIME: 1 * 24 * 60 * 60,
+	LOGIN_EXPIRE_TIME: 2 * 60 * 60,
+	OTP_EXPIRE_TIME: 2 * 60 * 60,
 	dbCode: {
 		inActive_by_admin: 0,
 		active_by_admin: 1,
