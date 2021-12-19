@@ -10,5 +10,6 @@ router.route('/register').post(adminController.register);
 router.route('/login').post(adminController.login);
 router.route('/toggeleUser/:userId').put(auth.isAdminJwt, userController.toggleActiveUser);
 router.route('/toggeleUserPost/:postId').put(auth.isAdminJwt, postController.togglePostActive);
+router.route('/logout').get(auth.isAdminJwt, adminController.logOut);
 
 module.exports = router;
