@@ -7,7 +7,7 @@ const messageBundle = require('../locales/en');
 exports.isUserJwt = async (req, res, next) => {
     try {
         let jwtToken = req.body.jwtToken || req.cookies.access_token || req.headers["access_token"];
-        // console.log(jwtToken.data);
+        // console.log(req.headers);
         let payload = await userJwt.decodeJwt(jwtToken);
         payload.data.role = config.ACCESS.USER;
 
