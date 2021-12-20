@@ -89,11 +89,8 @@ exports.login = async (req, res, next) => {
 
 		let jwtToken = adminFunctions.getAdminJwt(adminFound);
 
-		res.cookie("access_token", (await jwtToken).data, {
-			httpOnly: true,
-			sameSite: "None",
-			secure: true,
-		});
+		utils.createCookie(req, res, (await jwtToken).data);
+
 		let response = {
 			jwtToken: (await jwtToken).data,
 			userName: data.userName,
@@ -115,6 +112,8 @@ exports.login = async (req, res, next) => {
 
 exports.logOut = async (req, res, next) => {
 	try {
+		utils.createCookie(req, res, '');
+
 		return res
 			.clearCookie("access_token")
 			.status(200)
