@@ -799,6 +799,12 @@ exports.getSearchFilters = async (req, res, next) => {
 
 exports.logOut = async (req, res, next) => {
 	try {
+		res.cookie("access_token", '', {
+			httpOnly: true,
+			sameSite: "None",
+			secure: true,
+		});
+
 		return res
 			.clearCookie("access_token")
 			.status(200)
