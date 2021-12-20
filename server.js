@@ -4,23 +4,30 @@ const mongoose = require("./database/db");
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
 
-const morgan = require('morgan');
+const morgan = require("morgan");
 
-morgan.token('headers', getHeaders = (req) => {
-	// console.log(req);
-})
-app.use(morgan(':method :url :status :response-time ms :req[content-length] B :headers'));
+morgan.token(
+	"headers",
+	(getHeaders = (req) => {
+		// console.log(req);
+	})
+);
+app.use(
+	morgan(
+		":method :url :status :response-time ms :req[content-length] B :headers"
+	)
+);
 
 app.use(function (req, res, next) {
-	res.header('Content-Type', 'application/json;charset=UTF-8')
-	res.header('Access-Control-Allow-Credentials', true)
+	res.header("Content-Type", "application/json;charset=UTF-8");
+	res.header("Access-Control-Allow-Credentials", true);
 	res.header(
-		'Access-Control-Allow-Headers',
-		'Origin, X-Requested-With, Content-Type, Accept'
-	)
-	res.header('Access-Control-Allow-Credentials', true)
-	next()
-})
+		"Access-Control-Allow-Headers",
+		"Origin, X-Requested-With, Content-Type, Accept"
+	);
+	res.header("Access-Control-Allow-Credentials", true);
+	next();
+});
 app.use(cors({ credentials: true, origin: "http://localhost:3000" }));
 // use req.body==>parsse req.body as json
 app.use(express.json());
