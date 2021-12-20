@@ -207,11 +207,7 @@ exports.login = async (req, res, next) => {
 
 		let jwtToken = await userJwt.getUserJwt(getUser);
 
-		res.cookie("access_token", jwtToken.data, {
-			httpOnly: true,
-			sameSite: "None",
-			secure: true,
-		});
+		utils.createCookie(req, res, jwtToken.data);
 
 		// set redis key
 
@@ -610,6 +606,7 @@ exports.toggleActiveUser = async (req, res, next) => {
 		if (!getUser) {
 			// else fetch it from database
 			getUser = await user.findById(userId);
+			if (!getUser) return utils.sendResponse(req, res, false, messageBundle["search.fail"], {}, 'no such user exist');
 		} else {
 			// if its in redis then parse it to json
 			getUser = JSON.parse(getUser);
@@ -799,11 +796,7 @@ exports.getSearchFilters = async (req, res, next) => {
 
 exports.logOut = async (req, res, next) => {
 	try {
-		res.cookie("access_token", '', {
-			httpOnly: true,
-			sameSite: "None",
-			secure: true,
-		});
+		utils.createCookie(req, res, '');
 
 		return res
 			.clearCookie("access_token")

@@ -10,8 +10,8 @@ exports.isUserJwt = async (req, res, next) => {
 			req.body.jwtToken ||
 			req.cookies.access_token ||
 			req.headers["access_token"];
-		console.log(jwtToken);
-		console.log(req.headers);
+		// console.log(jwtToken);
+		// console.log(req.headers);
 		let payload = await userJwt.decodeJwt(jwtToken);
 		payload.data.role = config.ACCESS.USER;
 
@@ -34,6 +34,8 @@ exports.isAdminJwt = async (req, res, next) => {
 			req.body.jwtToken ||
 			req.cookies.access_token ||
 			req.headers["access_token"];
+
+		// console.log(req.cookies);
 		let payload = await adminJwt.decodeToken(jwtToken);
 		payload.data.role = config.ACCESS.ADMIN;
 		req.user = payload.data;

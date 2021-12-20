@@ -124,6 +124,19 @@ const deleteByUserIdAndPostId = async (data) => {
     const delData = await Post.findOneAndUpdate({ active: config.dbCode.post_active_byAdmin, postBy: data.userId, _id: data.postId }, { active: config.dbCode.post_Inactive_byAdmin }, { new: true });
     return delData;
 };
+
+// use of aggregate fauntion to find the number of users using 
+// the same tags for their posts
+const getCountUser_postFilters = async (data) => {
+    const getData = await Post.aggregate([{ '$unwind': "$tags" }, { '$group': { _id: "$tags", totalUsers: { $sum: 1 }, } }, { '$sort': { totalUsers: 1 } }]);
+    return getData;
+}
+const getMostLikedPosts = async (data) => {
+    const getData = await Post.aggregate([{ '$group': { _id: "$postBy", totalLikes: { $sum: "$number_of_likes" }, } }, { '$sort': { totalLikes: -1 } }, { '$limit': 10 }]);
+    return getData;
+}
+
+
 module.exports = {
     createPost,
     getAll,
@@ -139,5 +152,7 @@ module.exports = {
     updateByPostIdAndCommentId,
     deletePost,
     deleteByUserIdAndPostId,
-    updatePostLike_dec
+    updatePostLike_dec,
+    getCountUser_postFilters,
+    getMostLikedPosts
 }
