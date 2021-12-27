@@ -20,6 +20,7 @@ router.route('/profilePicture').put(auth.isUserJwt, imageUpload.single('image'),
 router.route('/addSearchFilter').put(auth.isUserJwt, userController.addSearchFilter);
 router.route('/removeSearchFilter').put(auth.isUserJwt, userController.removeSearchFilters);
 router.route('/searchFilter').get(auth.isUserJwt, userController.getSearchFilters);
+router.route('/getRandomUsers').get(auth.isUserJwt, userController.getRandomUsers);
 router.route('/logout').get(auth.isUserJwt, userController.logOut);
 // user post
 router.route('/posts').post(auth.isUserJwt, postController.createPost);
