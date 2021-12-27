@@ -42,6 +42,10 @@ module.exports = {
 		REQUEST_PASSWORD: "req_pass_",
 		MY_POSTS: "my_posts_"
 
+	},
+	/** secure to true if doing deployment */
+	COOKIES:{
+		SECURE:true,
 	}
 
 };

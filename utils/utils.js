@@ -1,3 +1,5 @@
+const config = require('./config');
+
 const classResponse = (success, data, err) => {
     return {
         success,
@@ -20,7 +22,7 @@ const createCookie = (req, res, data) => {
     res.cookie("access_token", data, {
         httpOnly: true,
         sameSite: "None",
-        secure: true,
+        secure: config.COOKIES.SECURE,
     });
 }
 

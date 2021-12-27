@@ -4,6 +4,7 @@ const mongoose = require("./database/db");
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
 
+
 const morgan = require("morgan");
 
 morgan.token(
@@ -40,6 +41,18 @@ app.use("/", require("./routes/test"));
 app.use("/api/", require("./routes/home"));
 app.use("/api/admin", require("./routes/admin"));
 app.use("/api/user", require("./routes/user"));
+
+
+/**
+ * error handling for page not found 404
+ */
+app.use((req,res,next)=>{
+	const err = new Error('Route Not Found');
+	res.status(404).json({
+		success:false,
+		message:err.message
+	});
+})
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server started on port ${PORT}`));
