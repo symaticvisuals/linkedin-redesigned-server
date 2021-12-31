@@ -751,14 +751,14 @@ exports.removeSearchFilters = async (req, res, next) => {
 			config.LOGIN_EXPIRE_TIME
 		);
 
-		user.updateData({ id: req.user._id, data: { intrestFilters: filters } });
+		let updateData = await user.updateData({ id: req.user._id, data: { intrestFilters: filters } });
 
 		return utils.sendResponse(
 			req,
 			res,
 			true,
 			messageBundle["update.success"],
-			filters,
+			updateData,
 			""
 		);
 	} catch (err) {
@@ -776,6 +776,7 @@ exports.getSearchFilters = async (req, res, next) => {
 		// if not in redis take the old ones from jwt
 		if (!filters) {
 			filters = req.user.intrestFilters;
+			console.log(filters,req.user.intrestFilters)
 		} else {
 			// if found redis key then parse it
 			filters = JSON.parse(filters);
@@ -798,6 +799,10 @@ exports.logOut = async (req, res, next) => {
 	try {
 		utils.createCookie(req, res, '');
 
+
+		await redis.deleteKey(config.REDIS_PREFIX.SEARCH_FILTERS + req.user._id);
+		await redis.deleteKey(config.REDIS_PREFIX.MY_POSTS + req.user._id);
+		await redis.deleteKey(config.REDIS_PREFIX.SEARCH_FILTERS + req.user._id);
 		return res
 			.clearCookie("access_token")
 			.status(200)

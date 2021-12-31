@@ -21,7 +21,7 @@ const postSchema = new mongoose.Schema({
     tags: [{ type: SchemaTypes.String }],
     time: { type: SchemaTypes.Date, default: Date.now() },
     active: { type: SchemaTypes.Number, default: config.dbCode.post_active_byAdmin },
-    postBy: { type: SchemaTypes.ObjectId, ref: 'users' }
+    postBy: { type: SchemaTypes.ObjectId, ref: config.SCHEMAS.USER  }
 });
 
 const postModel = mongoose.model(config.SCHEMAS.POST, postSchema);

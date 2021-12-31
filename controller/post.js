@@ -4,6 +4,7 @@ const redis = require('../redis/function');
 const messageBundle = require('../locales/en');
 const config = require('../utils/config');
 const { log, nextTick } = require('async');
+const _ = require('lodash');
 
 exports.createPost = async (req, res, next) => {
     try {

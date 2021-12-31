@@ -27,7 +27,7 @@ const UserSchema = new Schema({
 	following: [
 		{
 			userName: { type: SchemaTypes.String },
-			userId: { type: SchemaTypes.ObjectId, ref: "users" }
+			userId: { type: SchemaTypes.ObjectId, ref: config.SCHEMAS.USER }
 		}
 	],
 });

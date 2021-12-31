@@ -20,7 +20,7 @@ const createCookie = (req, res, data) => {
     res.cookie("access_token", data, {
         httpOnly: true,
         sameSite: "None",
-        secure: true,
+        secure: false,
     });
 }
 

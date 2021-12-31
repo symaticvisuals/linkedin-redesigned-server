@@ -3,6 +3,7 @@ const app = express();
 const mongoose = require("./database/db");
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
+const path = require('path');
 
 const morgan = require("morgan");
 
@@ -28,12 +29,19 @@ app.use(function (req, res, next) {
 	res.header("Access-Control-Allow-Credentials", true);
 	next();
 });
+
 app.use(cors({ credentials: true, origin: "http://localhost:3000" }));
+
+
 // use req.body==>parsse req.body as json
 app.use(express.json());
 
 // Parse Cookie header and populate req.cookies
 app.use(cookieParser());
+
+
+// public folder for images and videos
+app.use(express.static(path.join(__dirname,"public")));
 
 require("dotenv").config();
 app.use("/", require("./routes/test"));
