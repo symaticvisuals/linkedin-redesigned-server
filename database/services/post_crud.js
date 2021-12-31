@@ -1,9 +1,6 @@
 const Post = require('../models/post');
 const { Types, SchemaTypes } = require('mongoose');
 const config = require('../../utils/config');
-const { size } = require('lodash');
-const path = require('path/posix');
-const { select } = require('async');
 
 const createPost = async (data) => {
     let postData = await Post.create(data);
