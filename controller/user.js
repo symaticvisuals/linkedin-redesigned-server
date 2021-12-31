@@ -811,3 +811,22 @@ exports.logOut = async (req, res, next) => {
 		next(Err);
 	}
 };
+
+/**
+ * get random users for profile based on designation 
+ * also added pagination 10 users per page by default
+ * get user designation from redis
+ */
+exports.getRandomUsers = async(req,res,next)=>{
+	try{
+		let {page=1, limit=10} = req.query;
+		let currentUser = JSON.parse(await redis.getValue(
+			 req.user._id
+		));
+
+       let getData = await user.getRandomUsers(page, limit,currentUser.designation);
+	   return utils.sendResponse(req, res, true, messageBundle["search.success"], getData, '');
+	}catch(err){
+		next(err);
+	}
+}
