@@ -13,8 +13,8 @@ const messageBundle = require("../locales/en");
 const { PassThrough } = require("nodemailer/lib/xoauth2");
 require("dotenv").config();
 const _ = require("lodash");
-const { json } = require("express/lib/response");
-const UserModel = require("../database/models/user");
+
+
 const { REDIS_PREFIX } = require("../utils/config");
 
 exports.register = async (req, res, next) => {
@@ -836,7 +836,7 @@ exports.getRandomUsers = async(req,res,next)=>{
 exports.set_section_intro = async(req,res,next)=>{
 	try{
       const postData = await user.updateIntro({id:req.user._id, intro:req.body.intro});
-	//   await redis.setKey(config.REDIS_PREFIX.)
+	  await redis.setKey(req.user._id,JSON.stringify(postData), config.LOGIN_EXPIRE_TIME);
 	return utils.sendResponse(req, res, true, messageBundle["update.success"],postData, '');
 	}catch(err){
 		next(err);
@@ -845,6 +845,8 @@ exports.set_section_intro = async(req,res,next)=>{
 exports.set_section_backgroundPoster = async(req, res, next)=>{
 	try{
        const updateData = await user.updateBackgroundPoster({id:req.user._id,image:req.image });
+	   await redis.setKey(req.user._id,JSON.stringify(updateData), config.LOGIN_EXPIRE_TIME);
+
 	   return utils.sendResponse(req,res,true, messageBundle["update.success"], updateData, '');
 	}catch(err){
 		next(err);

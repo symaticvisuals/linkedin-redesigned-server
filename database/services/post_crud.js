@@ -13,13 +13,22 @@ const getAll = async () => {
 };
 
 
-// using populate method of mongoose to inner join post and user on key->postBy ,
-//  selcect helps in projection of populated data
+// using populate method of mongoose to inner join
+//  post and user on key->postBy ,likes.likeby, comments.commentBy
+//  select helps in projection of populated data
+// sort the post in descending order of time
 const getInPages = async (page, limit, filters) => {
     limit = parseInt(limit);
     let skip = (page - 1) * limit;
 
-    let getData = await Post.find({ active: config.dbCode.post_active_byAdmin, tags: { $in: filters } }, {}, { limit: limit, skip: skip }).populate({path:'postBy', select:'email firstName designation lastName userName profilePicture'});
+    let getData = await Post.find(
+        { active: config.dbCode.post_active_byAdmin, tags: { $in: filters } },
+        {},
+        { limit: limit, skip: skip }
+        ).populate({path:'postBy', select:'email firstName designation lastName userName profilePicture'}
+        ).populate({path:'likes.likeBy',select:'userName firstName profilePicture time'}
+        ).populate({path:'comments.commentBy',select:'userName firstName profilePicture time'}
+        ).sort({time:-1});
     // .limit(limit * 1).skip((page - 1) * limit);
     return getData;
 }
