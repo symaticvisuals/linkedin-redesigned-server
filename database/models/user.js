@@ -24,6 +24,10 @@ const UserSchema = new Schema({
 		}
 	],
 	number_of_following: { type: SchemaTypes.Number, default: 0 },
+	section:{
+        backgroundPoster:{type:SchemaTypes.String},
+		intro:{type:SchemaTypes.String, trim:true}
+	},
 	following: [
 		{
 			userName: { type: SchemaTypes.String },

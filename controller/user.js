@@ -13,8 +13,8 @@ const messageBundle = require("../locales/en");
 const { PassThrough } = require("nodemailer/lib/xoauth2");
 require("dotenv").config();
 const _ = require("lodash");
-const { json } = require("express/lib/response");
-const UserModel = require("../database/models/user");
+
+
 const { REDIS_PREFIX } = require("../utils/config");
 
 exports.register = async (req, res, next) => {
@@ -705,7 +705,7 @@ exports.addSearchFilter = async (req, res, next) => {
 
 		// delete the posts which were from old filters
 		await redis.deleteKey(
-			config.REDIS_PREFIX.POSTS_BY_PAGES + 1 + req.user._id
+			config.REDIS_PREFIX.POSTS_BY_PAGES + req.user._id
 		);
 
 		return utils.sendResponse(
@@ -799,10 +799,12 @@ exports.logOut = async (req, res, next) => {
 	try {
 		utils.createCookie(req, res, '');
 
-
+        // freeing up redis space
 		await redis.deleteKey(config.REDIS_PREFIX.SEARCH_FILTERS + req.user._id);
 		await redis.deleteKey(config.REDIS_PREFIX.MY_POSTS + req.user._id);
 		await redis.deleteKey(config.REDIS_PREFIX.SEARCH_FILTERS + req.user._id);
+		await redis.deleteKey(config.REDIS_PREFIX.POSTS_BY_PAGES + req.user._id);
+
 		return res
 			.clearCookie("access_token")
 			.status(200)
@@ -826,6 +828,26 @@ exports.getRandomUsers = async(req,res,next)=>{
 
        let getData = await user.getRandomUsers(page, limit,currentUser.designation);
 	   return utils.sendResponse(req, res, true, messageBundle["search.success"], getData, '');
+	}catch(err){
+		next(err);
+	}
+}
+
+exports.set_section_intro = async(req,res,next)=>{
+	try{
+      const postData = await user.updateIntro({id:req.user._id, intro:req.body.intro});
+	  await redis.setKey(req.user._id,JSON.stringify(postData), config.LOGIN_EXPIRE_TIME);
+	return utils.sendResponse(req, res, true, messageBundle["update.success"],postData, '');
+	}catch(err){
+		next(err);
+	}
+}
+exports.set_section_backgroundPoster = async(req, res, next)=>{
+	try{
+       const updateData = await user.updateBackgroundPoster({id:req.user._id,image:req.image });
+	   await redis.setKey(req.user._id,JSON.stringify(updateData), config.LOGIN_EXPIRE_TIME);
+
+	   return utils.sendResponse(req,res,true, messageBundle["update.success"], updateData, '');
 	}catch(err){
 		next(err);
 	}

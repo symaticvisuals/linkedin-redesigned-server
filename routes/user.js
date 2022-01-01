@@ -14,6 +14,8 @@ router.route('/search/byUserId/:userId').get(auth.isUserJwt, userController.getU
 router.route('/follow/:userId').put(auth.isUserJwt, userController.follow);
 router.route('/myProfile').get(auth.isUserJwt, userController.getUserProfile);
 router.route('/updateProfile').put(auth.isUserJwt, userController.updatMyProfiile);
+router.route('/updateProfile/intro').put(auth.isUserJwt, userController.set_section_intro);
+router.route('/updateProfile/backgroundImage').put(auth.isUserJwt,imageUpload.single('image'), userController.set_section_backgroundPoster);
 router.route('/requestPasswordChange/:email').get(userController.requestPasswordChange);
 router.route('/changePassword').put(userController.changePassword);
 router.route('/profilePicture').put(auth.isUserJwt, imageUpload.single('image'), userController.updateProfilePicture);
