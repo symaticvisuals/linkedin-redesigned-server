@@ -1,9 +1,7 @@
 const Post = require('../models/post');
 const { Types, SchemaTypes } = require('mongoose');
 const config = require('../../utils/config');
-const { size } = require('lodash');
-const path = require('path/posix');
-const { select } = require('async');
+
 
 const createPost = async (data) => {
     let postData = await Post.create(data);
@@ -21,7 +19,7 @@ const getInPages = async (page, limit, filters) => {
     limit = parseInt(limit);
     let skip = (page - 1) * limit;
 
-    let getData = await Post.find({ active: config.dbCode.post_active_byAdmin, tags: { $in: filters } }, {}, { limit: limit, skip: skip }).populate({path:'postBy', select:'email firstname lastName userName profilePicture'});
+    let getData = await Post.find({ active: config.dbCode.post_active_byAdmin, tags: { $in: filters } }, {}, { limit: limit, skip: skip }).populate({path:'postBy', select:'email firstName designation lastName userName profilePicture'});
     // .limit(limit * 1).skip((page - 1) * limit);
     return getData;
 }

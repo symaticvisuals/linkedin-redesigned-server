@@ -1,5 +1,6 @@
 const UserModel = require("../models/user");
 const config = require('../../utils/config');
+const { Mongoose, SchemaType } = require("mongoose");
 
 const create = async (createObj) => {
 	let userData = await UserModel.create(createObj);
@@ -80,7 +81,25 @@ const updateFilter = async (data) => {
 	return updatedFilter;
 }
 
+/**
+ * 
+ * @param {{intro:string, id:mongoId}} obj
+ * @returns {Object}
+ */
+const updateIntro = async(obj)=>{
+  const updateData = await UserModel.findByIdAndUpdate(obj.id, {"section.intro":obj.intro},{new:true});
+  return updateData;
+}
 
+/**
+ * 
+ * @param {{id:mongodbId, image:string}} obj
+ * @returns 
+ */
+const updateBackgroundPoster = async(obj)=>{
+	const updateData = await UserModel.findByIdAndUpdate(obj.id, {"section.backgroundPoster":obj.image}, {new:true});
+	return updateData;
+}
 const deleteUser = async (id) => {
 	const updatedData = await UserModel.findByIdAndUpdate(id, { isActive: config.dbCode.inActive_by_admin });
 	return updateData;
@@ -111,5 +130,7 @@ module.exports = {
 	updateFollowing,
 	updateFollowers,
 	updateFilter,
+	updateIntro,
+	updateBackgroundPoster,
 	getRandomUsers
 };
