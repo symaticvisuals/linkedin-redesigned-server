@@ -35,7 +35,7 @@ exports.isAdminJwt = async (req, res, next) => {
 			req.cookies.access_token ||
 			req.headers["access_token"];
 
-		console.log(jwtToken);
+		// console.log(jwtToken);
 		let payload = await adminJwt.decodeToken(jwtToken);
 		payload.data.role = config.ACCESS.ADMIN;
 		req.user = payload.data;

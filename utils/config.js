@@ -2,7 +2,8 @@ module.exports = {
 	SCHEMAS: {
 		ADMIN: "admin",
 		USER: "user",
-		POST: "Post"
+		POST: "Post",
+		FILTER:"filter"
 
 	},
 	ACCESS: {
@@ -33,6 +34,10 @@ module.exports = {
 		email_not_Authenticated: 0,
 		post_active_byAdmin: 1,
 		post_Inactive_byAdmin: 0,
+		filter_active:1,
+		filter_inActive:0,
+		user_logedIn:1,
+		user_logedOut:0,
 	},
 	REDIS_PREFIX: {
 		SEARCH_FILTERS: "searchFilters_",

@@ -4,6 +4,7 @@ const userController = require('../controller/user');
 const auth = require('../controller/auth');
 const { imageUpload, videoUpload } = require("../middleware/fileUpload");
 const postController = require('../controller/post');
+const filterController = require('../controller/filter')
 
 
 router.route('/register').post(userController.register);
@@ -24,6 +25,10 @@ router.route('/removeSearchFilter').put(auth.isUserJwt, userController.removeSea
 router.route('/searchFilter').get(auth.isUserJwt, userController.getSearchFilters);
 router.route('/getRandomUsers').get(auth.isUserJwt, userController.getRandomUsers);
 router.route('/logout').get(auth.isUserJwt, userController.logOut);
+
+// filters that can be used on post 
+router.route('/posts/filter').get(auth.isUserJwt, filterController.getAllFilters);
+
 // user post
 router.route('/posts').post(auth.isUserJwt, postController.createPost);
 router.route('/posts/imageUpload').post(auth.isUserJwt, imageUpload.single('image'), postController.imageUpload);

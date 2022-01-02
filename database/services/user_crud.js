@@ -41,6 +41,11 @@ const findByEmail = async (email) => {
 	return getData;
 };
 
+/**
+ * 
+ * @param {{id:mongoId, data:obj}} data 
+ * @returns 
+ */
 const updateData = async (data) => {
 	const updatedData = await UserModel.findByIdAndUpdate(data.id, data.data, { new: true });
 	return updatedData;
