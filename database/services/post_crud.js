@@ -7,8 +7,18 @@ const createPost = async (data) => {
     let postData = await Post.create(data);
     return postData;
 }
-const getAll = async () => {
-    let getData = await Post.find();
+
+/**
+ * 
+ * @param {{limit:string, page:string}} obj 
+ * @returns 
+ */
+const getAll = async (obj) => {
+    let limit = parseInt(obj.limit);
+    let page = parseInt(obj.page);
+    let skip = (page-1)*limit;
+
+    let getData = await Post.find().limit(limit).skip(skip);
     return getData;
 };
 

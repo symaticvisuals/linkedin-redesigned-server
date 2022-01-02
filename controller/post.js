@@ -279,3 +279,13 @@ exports.count_user_posts_likes = async (req, res, next) => {
         next(err);
     }
 }
+
+exports.getAllPosts = async(req,res,next)=>{
+    try{
+       const {page=1, limit=10} = req.query;
+       const getData = await Post.getAll({limit, page});
+       return utils.sendResponse(req,res,true, messageBundle['search.success'], getData,'');
+    }catch(err){
+        next(err);
+    }
+}

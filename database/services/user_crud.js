@@ -7,8 +7,17 @@ const create = async (createObj) => {
 	return userData;
 };
 
-const find = async () => {
-	let getData = await UserModel.find();
+/**
+ * 
+ * @param {{page:string, limit:string}} obj 
+ * @returns 
+ */
+const find = async (obj) => {
+	let page = parseInt(obj.page);
+	let limit = parseInt(obj.limit);
+	let skip = (page-1)*limit;
+
+	let getData = await UserModel.find().limit(limit).skip(skip);
 	return getData;
 };
 
