@@ -763,7 +763,15 @@ exports.addPostBookmark = async(req,res,next)=>{
 	//   check if post exist
 	  if(!post) return utils.sendResponse(req,res,false, messageBundle["search.success"], {}, 'no such post found');
 
-      const updateData = await user.updateBookmarks_inc({userId:req.user._id,postId:post._id,image:post.image, message:post.message });
+	  const isBookmarked = await user.findIfBookMarked({userId:req.user._id, postId:req.params.postId});
+	  console.log(isBookmarked);
+	  let updateData;
+	  if(isBookmarked){
+		updateData = await user.updateBookmarks_dec({userId:req.user._id,postId:req.params.postId });	  
+	  }else{
+		updateData = await user.updateBookmarks_inc({userId:req.user._id,postId:post._id,image:post.image, message:post.message });
+	  }
+
   
 	  //  update redis user
 	await redis.setKey(req.user._id, updateData, config.LOGIN_EXPIRE_TIME);
@@ -774,19 +782,7 @@ exports.addPostBookmark = async(req,res,next)=>{
 	}
 }
 
-exports.removeBookmark = async(req,res,next)=>{
-	try{
-       const updateData = await user.updateBookmarks_dec({userId:req.user._id, bookmarkId:req.params.bookmarkId});
-	  
-	//    update redis updated user
-	   await redis.setKey(req.user._id, updateData, config.LOGIN_EXPIRE_TIME);
-	 
-	   return utils.sendResponse(req,res,true, messageBundle["update.success"], updateData, '');
 
-	}catch(err){
-		next(err);
-	}
-}
 
 exports.getSearchFilters = async (req, res, next) => {
 	try {

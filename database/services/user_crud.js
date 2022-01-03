@@ -43,6 +43,18 @@ const findByEmail = async (email) => {
 
 /**
  * 
+ * @param {{userId:mongoId, postId}} obj 
+ */
+const findIfBookMarked = async(obj)=>{
+  const getData = await UserModel.findOne({_id:obj.userId, post_bookmarks:{
+	  $elemMatch:{
+		  postId:obj.postId
+	  }}});
+	  return getData;
+}
+
+/**
+ * 
  * @param {{id:mongoId, data:obj}} data 
  * @returns 
  */
@@ -107,17 +119,17 @@ const updateBookmarks_inc = async(data)=>{
   }
 
 /**
- * @param {{userId:mongoId, bookmarkId:mongoId}} data
+ * @param {{userId:mongoId, postId:mongoId}} data
  */
 const updateBookmarks_dec = async(data)=>{
 	const updateData = await UserModel.findOneAndUpdate({_id:data.userId,
 		post_bookmarks:{
 			$elemMatch:{
-				_id:data.bookmarkId
+				postId:data.postId
 			}
 		} },{
 		$inc:{number_of_postBookmarks:-1},
-		$pull:{post_bookmarks:{_id:data.bookmarkId}}
+		$pull:{post_bookmarks:{postId:data.postId}}
 	}, {new:true});
 	return updateData;
   }
@@ -170,6 +182,7 @@ module.exports = {
 	updateByEmail,
 	findByEmail,
 	findIfFollowing,
+	findIfBookMarked,
 	updateFollowing,
 	updateFollowers,
 	updateFilter,
