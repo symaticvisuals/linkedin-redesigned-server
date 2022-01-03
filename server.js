@@ -31,7 +31,7 @@ app.use(function (req, res, next) {
 	next();
 });
 
-app.use(cors({ credentials: true, origin: "http://localhost:3000" }));
+app.use(cors({ credentials: true, origin: ["http://localhost:3000", "https://linkedin-redesigned.vercel.app"] }));
 
 
 // use req.body==>parsse req.body as json
