@@ -42,6 +42,5 @@ router.route('/posts/likePost/:postId').put(auth.isUserJwt, postController.likeP
 router.route('/posts/comment').put(auth.isUserJwt, postController.createComment);
 router.route('/posts/deleteComment').put(auth.isUserJwt, postController.deleteComment);
 router.route('/posts/bookmark/:postId').put(auth.isUserJwt, userController.addPostBookmark);
-router.route('/posts/removeBookmark/:bookmarkId').put(auth.isUserJwt, userController.removeBookmark);
 
 module.exports = router;
