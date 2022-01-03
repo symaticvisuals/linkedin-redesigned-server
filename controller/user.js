@@ -16,6 +16,7 @@ const _ = require("lodash");
 
 
 const { REDIS_PREFIX } = require("../utils/config");
+const UserModel = require("../database/models/user");
 
 exports.register = async (req, res, next) => {
 	try {
@@ -205,19 +206,19 @@ exports.login = async (req, res, next) => {
 				"email is not authenticated"
 			);
 
-		let jwtToken = await userJwt.getUserJwt(getUser);
+	    let loggedIn_user = await user.updateData({id:getUser._id, data:{isLoggedIn:config.dbCode.user_logedIn}});
+		let jwtToken = await userJwt.getUserJwt(loggedIn_user);
 
 		utils.createCookie(req, res, jwtToken.data);
 
 		// set redis key
-
 		await redis.setKey(
-			getUser._id,
-			JSON.stringify(getUser),
+			loggedIn_user._id,
+			JSON.stringify(loggedIn_user),
 			config.LOGIN_EXPIRE_TIME
 		);
 
-		let response = { jwt: jwtToken.data, user: getUser };
+		let response = { jwt: jwtToken.data, user: loggedIn_user };
 		return utils.sendResponse(
 			req,
 			res,
@@ -254,14 +255,8 @@ exports.searchUser = async (req, res, next) => {
 				"user is blocked by admin"
 			);
 
-		let response = _.pick(getUser, [
-			"email",
-			"firstName",
-			"lastName",
-			"designation",
-			"userName",
-			"education",
-			"profilePic",
+		let response = _.omit(getUser, [
+			"password"
 		]);
 
 		return utils.sendResponse(
@@ -312,14 +307,8 @@ exports.getUserById = async (req, res, next) => {
 				"user is blocked by admin"
 			);
 
-		let response = _.pick(getUser, [
-			"email",
-			"firstName",
-			"lastName",
-			"designation",
-			"userName",
-			"education",
-			"profilePic",
+		let response = _.omit(getUser, [
+			"password"
 		]);
 
 		return utils.sendResponse(
@@ -798,12 +787,15 @@ exports.getSearchFilters = async (req, res, next) => {
 exports.logOut = async (req, res, next) => {
 	try {
 		utils.createCookie(req, res, '');
+ 
+		// change db isLoggedIn to 0
+		await user.updateData({id:req.user._id, data:{isLoggedIn:config.dbCode.user_logedOut}});
 
         // freeing up redis space
 		await redis.deleteKey(config.REDIS_PREFIX.SEARCH_FILTERS + req.user._id);
 		await redis.deleteKey(config.REDIS_PREFIX.MY_POSTS + req.user._id);
-		await redis.deleteKey(config.REDIS_PREFIX.SEARCH_FILTERS + req.user._id);
 		await redis.deleteKey(config.REDIS_PREFIX.POSTS_BY_PAGES + req.user._id);
+		await redis.deleteKey(req.user._id);
 
 		return res
 			.clearCookie("access_token")
@@ -851,4 +843,14 @@ exports.set_section_backgroundPoster = async(req, res, next)=>{
 	}catch(err){
 		next(err);
 	}
+}
+
+exports.getAllUsers = async(req,res,next)=>{
+  try{
+     const {page=1, limit=10} = req.query;
+	 const getData = await user.find({page, limit});
+	 return utils.sendResponse(req, res, true, messageBundle["search.success"], getData, '');
+  }catch(err){
+	  next(err);
+  }
 }
