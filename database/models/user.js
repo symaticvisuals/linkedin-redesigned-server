@@ -35,6 +35,14 @@ const UserSchema = new Schema({
 			userId: { type: SchemaTypes.ObjectId, ref: config.SCHEMAS.USER }
 		}
 	],
+	number_of_postBookmarks:{type:SchemaTypes.Number, default:0},
+	post_bookmarks:[
+		{
+			message:{ type: SchemaTypes.String },
+			image:{type:SchemaTypes.String},
+			postId:{type:SchemaTypes.ObjectId, ref:config.SCHEMAS.POST}
+		}
+	]
 });
 
 const UserModel = mongoose.model(config.SCHEMAS.USER, UserSchema);

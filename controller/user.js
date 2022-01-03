@@ -1,4 +1,5 @@
 const user = require("../database/services/user_crud");
+const Post = require("../database/services/post_crud");
 const utils = require("../utils/utils");
 const config = require("../utils/config");
 const async = require("async");
@@ -755,6 +756,38 @@ exports.removeSearchFilters = async (req, res, next) => {
 	}
 };
 
+exports.addPostBookmark = async(req,res,next)=>{
+	try{
+	  const post = await Post.getById(req.params.postId);
+
+	//   check if post exist
+	  if(!post) return utils.sendResponse(req,res,false, messageBundle["search.success"], {}, 'no such post found');
+
+      const updateData = await user.updateBookmarks_inc({userId:req.user._id,postId:post._id,image:post.image, message:post.message });
+  
+	  //  update redis user
+	await redis.setKey(req.user._id, updateData, config.LOGIN_EXPIRE_TIME);
+
+	  return utils.sendResponse(req,res,true, messageBundle["update.success"], updateData, '');
+	}catch(err){
+		next(err);
+	}
+}
+
+exports.removeBookmark = async(req,res,next)=>{
+	try{
+       const updateData = await user.updateBookmarks_dec({userId:req.user._id, bookmarkId:req.params.bookmarkId});
+	  
+	//    update redis updated user
+	   await redis.setKey(req.user._id, updateData, config.LOGIN_EXPIRE_TIME);
+	 
+	   return utils.sendResponse(req,res,true, messageBundle["update.success"], updateData, '');
+
+	}catch(err){
+		next(err);
+	}
+}
+
 exports.getSearchFilters = async (req, res, next) => {
 	try {
 		// get filters key from redis if user ever updated the filters in given session
@@ -851,6 +884,8 @@ exports.getAllUsers = async(req,res,next)=>{
 	 const getData = await user.find({page, limit});
 	 return utils.sendResponse(req, res, true, messageBundle["search.success"], getData, '');
   }catch(err){
+	if (err.name === 'CastError')
+	return utils.sendResponse(req, res, false, messageBundle['search.fail'], {}, 'not an objectId');
 	  next(err);
   }
 }

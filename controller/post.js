@@ -53,6 +53,17 @@ exports.videoUpload = async (req, res, next) => {
     }
 }
 
+exports.getPostById = async(req,res,next)=>{
+  try{
+    const getData = await Post.getById(req.params.postId);
+    return utils.sendResponse(req,res,true, messageBundle['search.success'], getData, '');
+  }catch(err){
+    if (err.name === 'CastError')
+    return utils.sendResponse(req, res, false, messageBundle['search.fail'], {}, 'not an objectId');
+      next(err);
+  }
+}
+
 exports.getPosts_home = async (req, res, next) => {
     try {
         const { page = 1, limit = 10 } = req.query;
@@ -207,7 +218,7 @@ exports.likePost_toggle = async (req, res, next) => {
             like = true;
             updatePost = await Post.updatePostLike_inc({ postId: req.params.postId, userId: req.user._id });
         }
-        return utils.sendResponse(req, res, true, messageBundle['update.success'], { like, userId: req.user._id, postId: req.params.postId }, '');
+        return utils.sendResponse(req, res, true, messageBundle['update.success'], { likeData:_.pick(updatePost,["likes", "number_of_likes"])  ,like, userId: req.user._id, postId: req.params.postId }, '');
 
     } catch (err) {
         console.log(err);
@@ -232,7 +243,8 @@ exports.createComment = async (req, res, next) => {
 
         let response = {
             comment: updateData.comments[updateData.number_of_comments - 1],
-            nummberOfComments: updateData.number_of_comments
+            nummberOfComments: updateData.number_of_comments,
+            comments:_.pick(updateData,["comments", "number_of_comments"])
         };
 
         return utils.sendResponse(req, res, true, messageBundle['update.success'], response, '');
@@ -286,6 +298,8 @@ exports.getAllPosts = async(req,res,next)=>{
        const getData = await Post.getAll({limit, page});
        return utils.sendResponse(req,res,true, messageBundle['search.success'], getData,'');
     }catch(err){
+        if (err.name === 'CastError')
+            return utils.sendResponse(req, res, false, messageBundle['search.fail'], {}, 'not an objectId');
         next(err);
     }
 }

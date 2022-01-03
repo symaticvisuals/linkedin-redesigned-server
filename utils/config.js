@@ -50,7 +50,7 @@ module.exports = {
 	},
 	/** secure to true if doing deployment */
 	COOKIES:{
-		SECURE:true,
+		SECURE:false,
 	}
 
 };

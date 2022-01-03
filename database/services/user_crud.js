@@ -96,6 +96,35 @@ const updateFilter = async (data) => {
 }
 
 /**
+ * @param {{userId:mongoId,postId:mongoId, image:string, message:string}} data
+ */
+const updateBookmarks_inc = async(data)=>{
+	const updateData = await UserModel.findOneAndUpdate({_id:data.userId },{
+		$inc:{number_of_postBookmarks:1},
+		$push:{post_bookmarks:{message:data.message, image:data.image, postId:data.postId}}
+	}, {new:true});
+	return updateData;
+  }
+
+/**
+ * @param {{userId:mongoId, bookmarkId:mongoId}} data
+ */
+const updateBookmarks_dec = async(data)=>{
+	const updateData = await UserModel.findOneAndUpdate({_id:data.userId,
+		post_bookmarks:{
+			$elemMatch:{
+				_id:data.bookmarkId
+			}
+		} },{
+		$inc:{number_of_postBookmarks:-1},
+		$pull:{post_bookmarks:{_id:data.bookmarkId}}
+	}, {new:true});
+	return updateData;
+  }
+
+
+
+/**
  * 
  * @param {{intro:string, id:mongoId}} obj
  * @returns {Object}
@@ -128,7 +157,7 @@ const deleteUser = async (id) => {
 const getRandomUsers = async(page, limit, designation)=>{
 	limit = parseInt(limit);
 	let skip = (limit) * (parseInt(page)-1);
-	const getData = await UserModel.find({isActive:config.dbCode.active_by_admin, designation:designation}, {username:1, designation:1,profilePicture:1 }, {limit:limit, skip:skip});
+	const getData = await UserModel.find({isActive:config.dbCode.active_by_admin, designation:designation}, {username:1, designation:1,profilePicture:1, lastName:1, isLoggedIn:1 }, {limit:limit, skip:skip});
 	return getData;
 }
 module.exports = {
@@ -146,5 +175,7 @@ module.exports = {
 	updateFilter,
 	updateIntro,
 	updateBackgroundPoster,
+	updateBookmarks_inc,
+	updateBookmarks_dec,
 	getRandomUsers
 };

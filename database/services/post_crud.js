@@ -22,6 +22,23 @@ const getAll = async (obj) => {
     return getData;
 };
 
+/**
+ * 
+ * @param {mongoId} id 
+ */
+const getCommentsByPostId = async(id)=>{
+  let getData = await Post.findById(id, {number_of_comments:1, comments:1}).populate({path:'comments.commentBy',select:'userName firstName lastName profilePicture time'});
+  return getData;
+}
+
+/**
+ * 
+ * @param {mongoId} id 
+ */
+const getLikesByPostId = async(id)=>{
+  let getData = await Post.findById(id, {number_of_likes:1, likes:1}).populate({path:'likes.likeBy',select:'userName firstName profilePicture time'});
+  return getData;
+}
 
 // using populate method of mongoose to inner join
 //  post and user on key->postBy ,likes.likeby, comments.commentBy
@@ -37,14 +54,16 @@ const getInPages = async (page, limit, filters) => {
         { limit: limit, skip: skip }
         ).populate({path:'postBy', select:'email firstName designation lastName userName profilePicture'}
         ).populate({path:'likes.likeBy',select:'userName firstName profilePicture time'}
-        ).populate({path:'comments.commentBy',select:'userName firstName profilePicture time'}
+        ).populate({path:'comments.commentBy',select:'userName firstName lastName profilePicture time'}
         ).sort({time:-1});
     // .limit(limit * 1).skip((page - 1) * limit);
     return getData;
 }
 
 const getById = async (id) => {
-    const getData = await Post.findById(id);
+    const getData = await Post.findById(id).populate({path:'likes.likeBy',select:'userName firstName profilePicture time'}
+    ).populate({path:'comments.commentBy',select:'userName firstName lastName profilePicture time'}
+    );
     return getData;
 };
 
@@ -95,7 +114,7 @@ updateByPostIdAndCommentId = async (data) => {
         }
     }, {
         new: true
-    });
+    }).populate({path:'comments.commentBy',select:'userName firstName lastName profilePicture time'});
     return getData;
 }
 
@@ -111,7 +130,7 @@ const updatePostLike_inc = async (data) => {
         active: config.dbCode.post_active_byAdmin,
 
     },
-        { $inc: { number_of_likes: 1 }, $push: { likes: { likeBy: data.userId } } }, { new: true });
+        { $inc: { number_of_likes: 1 }, $push: { likes: { likeBy: data.userId } } }, { new: true }).populate({path:'likes.likeBy',select:'userName firstName lastName profilePicture time'});
     return updateData;
 }
 const updatePostLike_dec = async (data) => {
@@ -121,7 +140,7 @@ const updatePostLike_dec = async (data) => {
         active: config.dbCode.post_active_byAdmin,
 
     },
-        { $inc: { number_of_likes: -1 }, $pull: { likes: { likeBy: data.userId } } }, { new: true });
+        { $inc: { number_of_likes: -1 }, $pull: { likes: { likeBy: data.userId } } }, { new: true }).populate({path:'likes.likeBy',select:'userName firstName lastName profilePicture time'});;
     return updateData;
 }
 
@@ -133,9 +152,11 @@ const updateComment_inc = async (data) => {
                 commentBy: data.userId
             }
         }
-    }, { new: true });
+    }, { new: true }).populate({path:'comments.commentBy',select:'userName firstName lastName profilePicture time'});;
     return updateData;
 }
+
+
 
 const deletePost = async (id) => {
     const delData = await Post.findByIdAndUpdate(id, { active: config.dbCode.post_Inactive_byAdmin });

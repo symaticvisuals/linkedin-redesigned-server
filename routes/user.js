@@ -34,11 +34,14 @@ router.route('/posts').post(auth.isUserJwt, postController.createPost);
 router.route('/posts/imageUpload').post(auth.isUserJwt, imageUpload.single('image'), postController.imageUpload);
 router.route('/posts/videoUpload').post(auth.isUserJwt, videoUpload.single('video'), postController.videoUpload);
 router.route('/posts/getPosts').get(auth.isUserJwt, postController.getPosts_home);
+router.route('/posts/getPosts/:postId').get(auth.isUserJwt, postController.getPostById);
 router.route('/posts/searchPosts/:search').get(auth.isUserJwt, postController.searchPost);
 router.route('/posts/myPosts').get(auth.isUserJwt, postController.getMyPosts);
 router.route('/posts/myPosts/delete/:postId').put(auth.isUserJwt, postController.userDeletePost);
 router.route('/posts/likePost/:postId').put(auth.isUserJwt, postController.likePost_toggle);
 router.route('/posts/comment').put(auth.isUserJwt, postController.createComment);
 router.route('/posts/deleteComment').put(auth.isUserJwt, postController.deleteComment);
+router.route('/posts/bookmark/:postId').put(auth.isUserJwt, userController.addPostBookmark);
+router.route('/posts/removeBookmark/:bookmarkId').put(auth.isUserJwt, userController.removeBookmark);
 
 module.exports = router;
