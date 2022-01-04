@@ -38,7 +38,8 @@ exports.imageUpload = async (req, res, next) => {
         let image = req.image;
         console.log(image);
         await redis.setKey(config.REDIS_PREFIX.POST_IMAGE + req.user._id, image, 120);
-        return utils.sendResponse(req, res, true, messageBundle['update.success'], image, '');
+        res.redirect('http://localhost:3000/');
+        // return utils.sendResponse(req, res, true, messageBundle['update.success'], image, '');
     } catch (err) {
         next(err);
     }
