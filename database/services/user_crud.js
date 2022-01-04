@@ -169,7 +169,7 @@ const deleteUser = async (id) => {
 const getRandomUsers = async(page, limit, designation)=>{
 	limit = parseInt(limit);
 	let skip = (limit) * (parseInt(page)-1);
-	const getData = await UserModel.find({isActive:config.dbCode.active_by_admin, designation:designation}, {username:1, designation:1,profilePicture:1, lastName:1, isLoggedIn:1 }, {limit:limit, skip:skip});
+	const getData = await UserModel.find({isActive:config.dbCode.active_by_admin, designation:designation}, {username:1, designation:1,profilePicture:1,firstName:1, lastName:1, isLoggedIn:1 }, {limit:limit, skip:skip});
 	return getData;
 }
 module.exports = {
